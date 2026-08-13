@@ -2,6 +2,25 @@
 
 <!-- start custom head snippets -->
 
+<!-- Apply the stored/system colour scheme before first paint.
+     The theme JS calls setTheme() with no argument on load, whose fallback is a
+     boolean, so the OS preference was never applied on the initial render. -->
+<script>
+    (function () {
+        try {
+            var stored = localStorage.getItem('theme');
+            var theme = (stored === 'dark' || stored === 'light')
+                ? stored
+                : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        } catch (e) { /* private mode / storage disabled: fall back to light */ }
+    })();
+</script>
+
 <!-- Web fonts: Inter (body) + Space Grotesk (headings) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

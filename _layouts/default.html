@@ -16,6 +16,12 @@ layout: compress
     {% include browser-upgrade.html %}
     {% include masthead.html %}
 
+    <!-- Fixed sun/moon theme toggle, centred in the corner glow. Keeps the ids
+         the theme script binds to (#theme-toggle / #theme-icon). -->
+    <button id="theme-toggle" class="theme-orb" type="button" title="Toggle light and dark theme" aria-label="Toggle light and dark theme">
+      <i id="theme-icon" class="fa-solid fa-sun" aria-hidden="true"></i>
+    </button>
+
     {{ content }}
 
     <div class="page__footer">

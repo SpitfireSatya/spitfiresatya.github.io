@@ -3,20 +3,42 @@
 <!-- Support for MathJax -->
 <script id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@4.0.0/tex-mml-chtml.js"></script>
 
+<!-- Back-to-top button (injected via JS so it's absent without scripting) -->
+<script>
+  (function () {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'back-to-top';
+    btn.setAttribute('aria-label', 'Back to top');
+    btn.innerHTML = '<i class="fas fa-arrow-up" aria-hidden="true"></i>';
+    btn.addEventListener('click', function () {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    });
+    document.body.appendChild(btn);
+    var toggle = function () {
+      if (window.scrollY > 400) { btn.classList.add('is-visible'); }
+      else { btn.classList.remove('is-visible'); }
+    };
+    toggle();
+    window.addEventListener('scroll', toggle, { passive: true });
+  })();
+</script>
+
 <!-- Scroll-reveal for cards (progressive enhancement; respects reduced-motion) -->
 <script>
-    (function () {
-        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        var els = document.querySelectorAll('.list__item .archive__item, .cv-item');
-        if (reduce || !('IntersectionObserver' in window) || !els.length) return;
-        els.forEach(function (el) { el.classList.add('reveal'); });
-        var io = new IntersectionObserver(function (entries) {
-            entries.forEach(function (e) {
-                if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
-            });
-        }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-        els.forEach(function (el) { io.observe(el); });
-    })();
+  (function () {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var els = document.querySelectorAll('.list__item .archive__item, .cv-item');
+    if (reduce || !('IntersectionObserver' in window) || !els.length) return;
+    els.forEach(function (el) { el.classList.add('reveal'); });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    els.forEach(function (el) { io.observe(el); });
+  })();
 </script>
 
 <!-- end custom footer snippets -->

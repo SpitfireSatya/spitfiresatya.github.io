@@ -7,23 +7,85 @@
 
 /* ---- Vibrant accent system ---------------------------------------------- */
 :root {
-    --accent: #4f46e5;
-    /* indigo */
-    --accent-2: #db2777;
-    /* pink   */
-    --grad: linear-gradient(120deg, #06b6d4 0%, #6366f1 45%, #d946ef 100%);
-    --grad-soft: linear-gradient(120deg, rgba(6, 182, 212, 0.10), rgba(99, 102, 241, 0.10), rgba(217, 70, 239, 0.10));
+    /* Text-bearing accents are deliberately deep so they keep >=4.5:1 contrast
+       even over the strongest part of the aurora (measured, not guessed). */
+    --accent: #312e81;
+    /* indigo-900 */
+    --accent-2: #9f1239;
+    /* rose-800: a warm red for text accents (the background stays pink-free) */
+    --accent-red-deep: #7f1d1d;
+    /* red-900: for emphasis sitting directly on the aurora, where the lighter
+       rose only reaches 3.7:1 */
+    /* Frosted panel behind CV entries: lifts text off the strongest part of the
+       aurora so the warm red clears 4.5:1 (it measures 3.67:1 unveiled). */
+    --panel: rgba(255, 255, 255, 0.38);
+    /* Darker gradient reserved for gradient-filled TEXT, so large headings
+       stay legible; the light --grad is for decorative bars only. */
+    --grad-text: linear-gradient(120deg, #0e7490 0%, #4338ca 45%, #6d28d9 100%);
+    /* Stops stay in the cyan -> blue -> indigo range (hue <= 240). Anything
+       past ~250 starts reading as pinkish purple. */
+    --grad: linear-gradient(120deg, #06b6d4 0%, #3b82f6 45%, #6366f1 100%);
+    --grad-soft: linear-gradient(120deg, rgba(6, 182, 212, 0.10), rgba(59, 130, 246, 0.10), rgba(99, 102, 241, 0.10));
     --glow: rgba(99, 102, 241, 0.28);
     --sidebar-text: #23293a;
+    /* Single source of truth for animation timing: the line sweep and the
+       aurora drift both use this, so they can never fall out of sync. */
+    --sweep-dur: 24s;
+    /* Position of the sun/moon orb. Shared by the orb itself and by the masks
+       that fade the gradient lines out around it. */
+    /* Nudged down/left of the true corner: the glow circle is clipped by the
+       top and right viewport edges, so its *visible* centre sits lower-left of
+       its geometric centre. This places the orb in that visual centre. */
+    --orb-right: 7.5rem;
+    --orb-top: 5rem;
+    --orb-size: 3.6rem;
+    /* How far the light "erases" the gradient lines around the orb:
+       --orb-mask is the full falloff radius, --orb-clear the fully-hidden part. */
+    --orb-mask: 17rem;
+    --orb-clear: 58%;
+    /* Seamless (palindromic) gradients so they tile without a hard seam,
+       used by the synchronized sweep animation. */
+    --grad-loop: linear-gradient(90deg, #06b6d4, #3b82f6, #6366f1, #3b82f6, #06b6d4);
+    --grad-loop-v: linear-gradient(180deg, #06b6d4, #3b82f6, #6366f1, #3b82f6, #06b6d4);
+
+    /* Re-point the theme's own palette (originally teal) at our indigo/violet
+       scheme so links, active nav items and pagination stay consistent. */
+    --global-base-color: #312e81;
+    --global-link-color: #312e81;
+    --global-link-color-hover: #1e1b4b;
+    --global-link-color-visited: #4c1d95;
+    /* Darker body text: the theme default measured only 4.27:1 over the aurora */
+    --global-text-color: #2f3541;
 }
 
 html[data-theme="dark"] {
-    --accent: #a5b4fc;
-    --accent-2: #f0abfc;
-    --grad: linear-gradient(120deg, #22d3ee 0%, #818cf8 45%, #e879f9 100%);
-    --grad-soft: linear-gradient(120deg, rgba(34, 211, 238, 0.14), rgba(129, 140, 248, 0.14), rgba(232, 121, 249, 0.14));
+    /* Pale enough to clear 4.5:1 against the dark aurora (measured) */
+    --accent: #eef2ff;
+    --accent-2: #fecdd3;
+    /* rose-200: the warm accent, lightened for the night sky */
+    --accent-red-deep: #fecdd3;
+    --grad-text: linear-gradient(120deg, #67e8f9 0%, #a5b4fc 45%, #c4b5fd 100%);
+    --panel: rgba(7, 13, 32, 0.38);
+    --grad: linear-gradient(120deg, #22d3ee 0%, #818cf8 45%, #a78bfa 100%);
+    --grad-soft: linear-gradient(120deg, rgba(34, 211, 238, 0.14), rgba(129, 140, 248, 0.14), rgba(167, 139, 250, 0.14));
     --glow: rgba(129, 140, 248, 0.40);
     --sidebar-text: #f2f4f8;
+    --grad-loop: linear-gradient(90deg, #22d3ee, #818cf8, #a78bfa, #818cf8, #22d3ee);
+    --grad-loop-v: linear-gradient(180deg, #22d3ee, #818cf8, #a78bfa, #818cf8, #22d3ee);
+
+    --global-base-color: #a5b4fc;
+    --global-link-color: #eef2ff;
+    --global-link-color-hover: #ffffff;
+    --global-link-color-visited: #ede9fe;
+
+    /* Night sky: a deep navy canvas for the aurora to sit against */
+    --global-bg-color: #070d20;
+    --global-footer-bg-color: #060b1a;
+    --global-border-color: #26304d;
+    --global-dark-border-color: #33405f;
+    --global-code-background-color: #0d1428;
+    --global-code-text-color: #dbe4ff;
+    --global-thead-color: #131c36;
 }
 
 /* ---- Typography --------------------------------------------------------- */
@@ -59,7 +121,7 @@ h4,
 .page__title,
 .cv-header h1,
 .author__name {
-    background: var(--grad);
+    background: var(--grad-text);
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
@@ -81,10 +143,132 @@ h4,
     height: 4px;
     margin-top: 0.5rem;
     border-radius: 4px;
-    background: var(--grad);
+    /* background-image supplied by the synchronized sweep rule */
 }
 
-/* ---- Animated gradient bar across the very top of the page -------------- */
+/* ---- Synchronized gradient sweep --------------------------------------- */
+/* Every gradient line shares one animation, one duration, and (thanks to
+   background-attachment: fixed) one viewport coordinate space, so the colour
+   sweep reads as a single light travelling across the whole page rather than
+   each line animating on its own. */
+body::before,
+.masthead::after,
+.page__footer::before,
+.page__content h1::after,
+.page__content h2::after,
+.page__content hr,
+.archive>h2::after,
+.archive>hr {
+    background-image: var(--grad-loop);
+    background-size: 200vw 100%;
+    background-repeat: repeat;
+    background-attachment: fixed;
+    animation: gradSweep var(--sweep-dur) linear infinite;
+}
+
+/* Horizontal rules become gradient lines too */
+.page__content hr {
+    height: 3px;
+    border: 0;
+    border-radius: 3px;
+}
+
+/* Vertical rails use the vertical variant, same duration to stay in phase */
+.cv-timeline .cv-list::before {
+    background-image: var(--grad-loop-v);
+    background-size: 100% 200vh;
+    background-repeat: repeat;
+    background-attachment: fixed;
+    animation: gradSweepV var(--sweep-dur) linear infinite;
+}
+
+@keyframes gradSweep {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 200vw 0;
+    }
+}
+
+@keyframes gradSweepV {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 0 200vh;
+    }
+}
+
+/* Layer B of the cross-fade: indigo/violet. Sits behind layer A and fades in
+   as A fades out, so the palette travels cyan -> blue -> violet and back
+   through colours we choose explicitly. Blending cyan with violet yields a
+   blue/periwinkle midpoint, never magenta. */
+html::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background-image:
+        /* Indigo rather than violet: at these alphas violet leaves the red
+           channel ~23 above green in the blend, which reads pink/lavender.
+           Indigo keeps R and G within ~5 of each other, so no pink cast. */
+        radial-gradient(50rem 50rem at 4% -8%, rgba(79, 70, 229, 0.52), transparent 62%),
+        radial-gradient(46rem 46rem at 100% 2%, rgba(67, 56, 202, 0.48), transparent 62%),
+        radial-gradient(52rem 52rem at 96% 100%, rgba(55, 48, 163, 0.46), transparent 60%),
+        radial-gradient(40rem 40rem at 20% 108%, rgba(99, 102, 241, 0.42), transparent 60%),
+        radial-gradient(46rem 46rem at 50% 48%, rgba(79, 70, 229, 0.38), transparent 62%);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+    background-repeat: no-repeat;
+    animation: auroraB var(--sweep-dur) ease-in-out infinite;
+    will-change: transform, opacity;
+}
+
+/* Layer B (dark): the crimson/rose crown that sits above the green curtains in
+   a real aurora, with a magenta-free rose so it stays natural. */
+html[data-theme="dark"]::after {
+    background-image:
+        radial-gradient(48rem 34rem at 20% -10%, rgba(244, 63, 94, 0.26), transparent 60%),
+        radial-gradient(44rem 32rem at 86% -4%, rgba(217, 70, 100, 0.22), transparent 60%),
+        radial-gradient(52rem 40rem at 60% 20%, rgba(190, 24, 93, 0.16), transparent 62%),
+        radial-gradient(44rem 38rem at 30% 92%, rgba(20, 184, 166, 0.20), transparent 60%),
+        radial-gradient(46rem 40rem at 50% 50%, rgba(56, 189, 248, 0.16), transparent 62%);
+}
+
+@keyframes auroraA {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1.2) translate3d(0, 0, 0);
+    }
+
+    50% {
+        opacity: 0.14;
+        transform: scale(1.34) translate3d(10%, -11%, 0);
+    }
+}
+
+@keyframes auroraB {
+
+    0%,
+    100% {
+        opacity: 0.14;
+        transform: scale(1.34) translate3d(-9%, -7%, 0);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2) translate3d(0, 0, 0);
+    }
+}
+
+
+
+/* The bar across the very top of the page */
 body::before {
     content: "";
     position: fixed;
@@ -93,19 +277,25 @@ body::before {
     right: 0;
     height: 4px;
     z-index: 1000;
-    background: var(--grad);
-    background-size: 200% 100%;
-    animation: slideGrad 7s linear infinite;
 }
 
-@keyframes slideGrad {
-    0% {
-        background-position: 0% 0;
-    }
+/* Fade the top bar and the header underline out around the sun/moon. Painting
+   the glow above them isn't enough: the glow is translucent, so the lines still
+   showed through. Masking removes those pixels entirely, so the light reads as
+   washing the lines out. Mask coordinates are element-relative; the header
+   underline sits ~4.2rem below the viewport top, hence the offset. */
+body::before {
+    -webkit-mask-image: radial-gradient(var(--orb-mask) var(--orb-mask) at calc(100% - var(--orb-right)) var(--orb-top),
+            transparent 0 var(--orb-clear), #000 100%);
+    mask-image: radial-gradient(var(--orb-mask) var(--orb-mask) at calc(100% - var(--orb-right)) var(--orb-top),
+            transparent 0 var(--orb-clear), #000 100%);
+}
 
-    100% {
-        background-position: 200% 0;
-    }
+.masthead::after {
+    -webkit-mask-image: radial-gradient(var(--orb-mask) var(--orb-mask) at calc(100% - var(--orb-right)) calc(var(--orb-top) - 4.2rem),
+            transparent 0 var(--orb-clear), #000 100%);
+    mask-image: radial-gradient(var(--orb-mask) var(--orb-mask) at calc(100% - var(--orb-right)) calc(var(--orb-top) - 4.2rem),
+            transparent 0 var(--orb-clear), #000 100%);
 }
 
 /* ---- Ambient background: soft accent "aurora" + faint dot grid ---------- */
@@ -126,33 +316,79 @@ body::after {
     z-index: -1;
     pointer-events: none;
     background-color: transparent;
+    /* Slow, gentle drift kept in phase with the line sweep (4 x 14s).
+       Uses transform (compositor-friendly) and a baseline scale so the
+       layer's edges never come into view. */
+    /* Layer A of the cross-fade (cyan/blue). Same duration as the line sweep
+       so the whole page pulses as one system. No hue-rotate: that filter is a
+       matrix approximation and swings blues through magenta. */
+    animation: auroraA var(--sweep-dur) ease-in-out infinite;
+    will-change: transform, opacity;
+    /* Layer A: cyan/sky. Cross-fades with layer B's indigo, so the background
+       travels cyan-blue -> indigo. Keeping layer B off violet removes the pink
+       cast; brightening layer A to cyan preserves the visible separation. */
     background-image:
-        radial-gradient(50rem 50rem at 4% -8%, rgba(6, 182, 212, 0.30), transparent 62%),
-        radial-gradient(46rem 46rem at 100% 2%, rgba(217, 70, 239, 0.26), transparent 62%),
-        radial-gradient(52rem 52rem at 96% 100%, rgba(99, 102, 241, 0.26), transparent 60%),
-        radial-gradient(40rem 40rem at 20% 108%, rgba(6, 182, 212, 0.20), transparent 60%),
-        radial-gradient(46rem 46rem at 50% 48%, rgba(139, 92, 246, 0.16), transparent 62%),
-        radial-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 1px);
+        radial-gradient(50rem 50rem at 4% -8%, rgba(14, 165, 233, 0.50), transparent 62%),
+        radial-gradient(46rem 46rem at 100% 2%, rgba(6, 182, 212, 0.46), transparent 62%),
+        radial-gradient(52rem 52rem at 96% 100%, rgba(2, 132, 199, 0.44), transparent 60%),
+        radial-gradient(40rem 40rem at 20% 108%, rgba(56, 189, 248, 0.40), transparent 60%),
+        radial-gradient(46rem 46rem at 50% 48%, rgba(6, 182, 212, 0.34), transparent 62%),
+        radial-gradient(rgba(37, 99, 235, 0.08) 1px, transparent 1px);
     background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 24px 24px;
     background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat;
 }
 
+/* Dark mode = night sky. Layer A carries the classic green/teal aurora
+   curtains plus two star fields at different scales for depth. */
 html[data-theme="dark"] body::after {
     background-image:
-        radial-gradient(50rem 50rem at 4% -8%, rgba(34, 211, 238, 0.34), transparent 62%),
-        radial-gradient(46rem 46rem at 100% 2%, rgba(232, 121, 249, 0.30), transparent 62%),
-        radial-gradient(52rem 52rem at 96% 100%, rgba(129, 140, 248, 0.32), transparent 60%),
-        radial-gradient(40rem 40rem at 20% 108%, rgba(34, 211, 238, 0.24), transparent 60%),
-        radial-gradient(46rem 46rem at 50% 48%, rgba(167, 139, 250, 0.22), transparent 62%),
-        radial-gradient(rgba(129, 140, 248, 0.10) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 24px 24px;
-    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+        radial-gradient(50rem 40rem at 12% -6%, rgba(34, 197, 94, 0.34), transparent 62%),
+        radial-gradient(46rem 38rem at 92% 4%, rgba(16, 185, 129, 0.30), transparent 62%),
+        radial-gradient(52rem 44rem at 70% 96%, rgba(20, 184, 166, 0.26), transparent 60%),
+        radial-gradient(40rem 34rem at 16% 104%, rgba(52, 211, 153, 0.24), transparent 60%),
+        radial-gradient(46rem 40rem at 46% 44%, rgba(6, 182, 212, 0.20), transparent 62%),
+        radial-gradient(rgba(255, 255, 255, 0.95) 1.1px, transparent 1.3px),
+        radial-gradient(rgba(255, 255, 255, 0.75) 0.9px, transparent 1.1px),
+        radial-gradient(rgba(214, 232, 255, 0.55) 0.7px, transparent 0.9px);
+    background-size:
+        100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%,
+        150px 150px, 91px 103px, 57px 61px;
+    background-position:
+        0 0, 0 0, 0 0, 0 0, 0 0,
+        12px 24px, 43px 9px, 71px 37px;
+    background-repeat:
+        no-repeat, no-repeat, no-repeat, no-repeat, no-repeat,
+        repeat, repeat, repeat;
 }
 
 /* ---- Header / navigation color (no positioning changes) ----------------- */
+/* NOTE: background-image comes from the synchronized sweep rule above; don't
+   set the `background` shorthand here or it resets size/attachment. */
 .masthead::after {
     height: 3px;
-    background: var(--grad);
+}
+
+/* Let the light through the header itself. The masthead's opaque fill is moved
+   onto a pseudo-element so it can be masked around the orb; the nav links stay
+   on top of it, unmasked and fully legible. The theme also paints the bar colour
+   on .greedy-nav and each menu item, so those are cleared too. */
+.masthead,
+.greedy-nav,
+.masthead__menu-item {
+    background: transparent;
+    background-color: transparent;
+}
+
+.masthead::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--global-bg-color);
+    -webkit-mask-image: radial-gradient(var(--orb-mask) var(--orb-mask) at calc(100% - var(--orb-right)) var(--orb-top),
+            transparent 0 var(--orb-clear), #000 100%);
+    mask-image: radial-gradient(var(--orb-mask) var(--orb-mask) at calc(100% - var(--orb-right)) var(--orb-top),
+            transparent 0 var(--orb-clear), #000 100%);
 }
 
 /* Brand / name in the nav gets the gradient treatment */
@@ -256,7 +492,10 @@ html[data-theme="dark"] body::after {
     padding: 1.2rem 1.3rem 1.2rem 1.5rem;
     border: 1px solid var(--global-border-color);
     border-radius: 12px;
-    background: var(--global-bg-color);
+    /* Frosted rather than solid, so the aurora reads through the cards */
+    background: var(--panel);
+    -webkit-backdrop-filter: blur(7px) saturate(1.08);
+    backdrop-filter: blur(7px) saturate(1.08);
     overflow: hidden;
     transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
@@ -275,7 +514,8 @@ html[data-theme="dark"] body::after {
 
 .list__item .archive__item:hover {
     transform: translateY(-4px);
-    background: var(--grad-soft);
+    /* tint layered over the panel, so hover keeps its readable backdrop */
+    background: var(--grad-soft), var(--panel);
     box-shadow: 0 16px 36px var(--glow);
 }
 
@@ -308,11 +548,14 @@ html[data-theme="dark"] body::after {
     padding: 0.85rem 1rem 0.85rem 1.15rem;
     border-radius: 10px;
     border-left: 3px solid transparent;
+    background: var(--panel);
+    -webkit-backdrop-filter: blur(7px) saturate(1.08);
+    backdrop-filter: blur(7px) saturate(1.08);
     transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
 }
 
 .cv-item:hover {
-    background: var(--grad-soft);
+    background: var(--grad-soft), var(--panel);
     border-left-color: var(--accent);
     transform: translateX(4px);
 }
@@ -344,7 +587,7 @@ html[data-theme="dark"] body::after {
     content: "";
     display: block;
     height: 3px;
-    background: var(--grad);
+    /* background-image supplied by the synchronized sweep rule */
 }
 
 .page__footer footer {
@@ -389,8 +632,27 @@ blockquote {
         scroll-behavior: auto;
     }
 
-    body::before {
-        animation: none;
+    body::before,
+    body::after,
+    .masthead::after,
+    .page__footer::before,
+    .page__content h1::after,
+    .page__content h2::after,
+    .page__content hr,
+    .cv-timeline .cv-list::before {
+        animation: none !important;
+    }
+
+    body::after {
+        transform: none;
+        filter: none;
+        opacity: 1;
+    }
+
+    html::after {
+        animation: none !important;
+        transform: none;
+        opacity: 0.5;
     }
 
     .page__content {
@@ -531,5 +793,521 @@ blockquote {
     .reveal {
         opacity: 1;
         transform: none;
+    }
+}
+
+/* ---- CV timeline (Education / Work Experience) --------------------------- */
+/* Two-column timeline: dates in a left gutter, a gradient rail down the
+   middle, content on the right. `display: contents` on the item header lets
+   the date and title become grid items of .cv-item without markup changes. */
+$tl-gutter: 8rem; // width of the date column
+$tl-gap: 2rem; // space between the date column and the content
+$tl-rail: 9rem; // rail x-position ($tl-gutter + $tl-gap / 2)
+
+.cv-timeline .cv-list {
+    position: relative;
+    margin-left: 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+/* The vertical gradient rail */
+.cv-timeline .cv-list::before {
+    content: "";
+    position: absolute;
+    left: calc(#{$tl-rail} - 1px);
+    top: 0.6rem;
+    bottom: 0.6rem;
+    width: 2px;
+    border-radius: 2px;
+    /* background-image supplied by the synchronized vertical sweep rule */
+}
+
+.cv-timeline .cv-item {
+    display: grid;
+    grid-template-columns: $tl-gutter 1fr;
+    column-gap: $tl-gap;
+    align-items: start;
+    border-left: 0;
+    padding: 0.75rem 1rem 0.9rem 0;
+}
+
+/* Pull the nested date/title out so they can be placed in the grid */
+.cv-timeline .cv-item-header {
+    display: contents;
+}
+
+.cv-timeline .cv-item-date {
+    grid-column: 1;
+    grid-row: 1;
+    text-align: right;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    padding-top: 0.15rem;
+}
+
+.cv-timeline .cv-item-title {
+    grid-column: 2;
+    grid-row: 1;
+    margin-bottom: 0.35rem;
+}
+
+.cv-timeline .cv-item-content {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+/* The node sitting on the rail */
+.cv-timeline .cv-item::before {
+    content: "";
+    position: absolute;
+    left: calc(#{$tl-rail} - 6px);
+    top: 1.1rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--global-bg-color);
+    border: 2.5px solid var(--accent);
+    box-shadow: 0 0 0 4px var(--global-bg-color);
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    z-index: 1;
+}
+
+.cv-timeline .cv-item:hover {
+    /* keep nodes aligned to the rail: no horizontal shift */
+    transform: none;
+    border-left: 0;
+}
+
+.cv-timeline .cv-item:hover::before {
+    background: var(--accent);
+    border-color: var(--accent-2);
+    transform: scale(1.3);
+}
+
+/* Collapse to a single column on narrow screens */
+@media screen and (max-width: 37.5em) {
+    .cv-timeline .cv-item {
+        grid-template-columns: 1fr;
+        column-gap: 0;
+        padding-left: 1.5rem;
+    }
+
+    .cv-timeline .cv-item-date,
+    .cv-timeline .cv-item-title,
+    .cv-timeline .cv-item-content {
+        grid-column: 1;
+    }
+
+    .cv-timeline .cv-item-date {
+        grid-row: 1;
+        text-align: left;
+    }
+
+    .cv-timeline .cv-item-title {
+        grid-row: 2;
+    }
+
+    .cv-timeline .cv-item-content {
+        grid-row: 3;
+    }
+
+    .cv-timeline .cv-list::before {
+        left: 3px;
+    }
+
+    .cv-timeline .cv-item::before {
+        left: -2px;
+        top: 1rem;
+    }
+}
+
+/* ---- Back-to-top button ------------------------------------------------- */
+.back-to-top {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 5.25rem;
+    z-index: 900;
+    width: 2.75rem;
+    height: 2.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #fff;
+    background: var(--grad);
+    background-size: 200% auto;
+    box-shadow: 0 8px 22px var(--glow);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease,
+        background-position 0.4s ease, box-shadow 0.2s ease;
+}
+
+.back-to-top.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+}
+
+.back-to-top:hover {
+    background-position: right center;
+    box-shadow: 0 12px 30px var(--glow);
+    transform: translateY(-2px);
+}
+
+/* ---- Gradient scrollbar ------------------------------------------------- */
+/* Firefox */
+html {
+    scrollbar-color: var(--accent) transparent;
+    scrollbar-width: thin;
+}
+
+/* WebKit / Blink */
+::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-clip: content-box;
+    background-color: transparent;
+    background-image: linear-gradient(180deg, #06b6d4, #6366f1 50%, #8b5cf6);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-image: linear-gradient(180deg, #0891b2, #4f46e5 50%, #7c3aed);
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background-image: linear-gradient(180deg, #22d3ee, #818cf8 50%, #a78bfa);
+}
+
+/* ---- Keyboard focus visibility (accessibility) -------------------------- */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Don't show the ring for mouse users in browsers supporting :focus-visible */
+a:focus:not(:focus-visible),
+button:focus:not(:focus-visible) {
+    outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .back-to-top,
+    .back-to-top:hover {
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+        transform: none;
+    }
+
+    .cv-timeline .cv-item:hover::before {
+        transform: none;
+    }
+}
+
+/* ---- Sun / moon theme toggle -------------------------------------------- */
+/* A fixed celestial body sitting at the centre of the corner glow. The glow is
+   centred at (right: 5rem, top: 3rem); the negative margins below place this
+   orb's centre on exactly that point. */
+.theme-orb {
+    position: fixed;
+    top: var(--orb-top);
+    right: var(--orb-right);
+    width: var(--orb-size);
+    height: var(--orb-size);
+    margin: calc(var(--orb-size) / -2) calc(var(--orb-size) / -2) 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    /* Above the animated top bar (1000) and the masthead (20), so neither the
+       sweep lines nor the header border cut across the sun/moon or its glow. */
+    z-index: 1001;
+    transition: transform 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.theme-orb:hover {
+    transform: rotate(-18deg) scale(1.14);
+}
+
+#theme-icon {
+    font-size: 1.85rem;
+    line-height: 1;
+    transition: color 0.25s ease, text-shadow 0.25s ease;
+}
+
+/* The crescent glyph reads optically smaller than the sun, so give it a touch more */
+#theme-icon.fa-moon {
+    font-size: 2rem;
+}
+
+/* Nudge inward on small screens so it clears the nav's collapse button */
+@media screen and (max-width: 37.5em) {
+    :root {
+        --orb-right: 4.5rem;
+        --orb-top: 4rem;
+        --orb-size: 2.9rem;
+    }
+
+    #theme-icon {
+        font-size: 1.5rem;
+    }
+
+    #theme-icon.fa-moon {
+        font-size: 1.65rem;
+    }
+}
+
+/* Light mode: a warm sun that radiates */
+#theme-icon.fa-sun {
+    color: #f59e0b;
+    text-shadow:
+        0 0 6px rgba(251, 191, 36, 0.95),
+        0 0 16px rgba(251, 146, 60, 0.75),
+        0 0 30px rgba(251, 191, 36, 0.45);
+    animation: sunPulse calc(var(--sweep-dur) / 3) ease-in-out infinite;
+}
+
+/* Dark mode: a cool moon with a soft halo */
+#theme-icon.fa-moon {
+    color: #e8eeff;
+    text-shadow:
+        0 0 6px rgba(226, 232, 255, 0.95),
+        0 0 18px rgba(165, 180, 252, 0.7),
+        0 0 34px rgba(129, 140, 248, 0.45);
+    animation: moonPulse calc(var(--sweep-dur) / 3) ease-in-out infinite;
+}
+
+@keyframes sunPulse {
+
+    0%,
+    100% {
+        text-shadow:
+            0 0 6px rgba(251, 191, 36, 0.95),
+            0 0 16px rgba(251, 146, 60, 0.7),
+            0 0 28px rgba(251, 191, 36, 0.4);
+    }
+
+    50% {
+        text-shadow:
+            0 0 9px rgba(251, 191, 36, 1),
+            0 0 24px rgba(251, 146, 60, 0.9),
+            0 0 44px rgba(251, 191, 36, 0.6);
+    }
+}
+
+@keyframes moonPulse {
+
+    0%,
+    100% {
+        text-shadow:
+            0 0 6px rgba(226, 232, 255, 0.9),
+            0 0 18px rgba(165, 180, 252, 0.6),
+            0 0 32px rgba(129, 140, 248, 0.4);
+    }
+
+    50% {
+        text-shadow:
+            0 0 10px rgba(255, 255, 255, 1),
+            0 0 26px rgba(199, 210, 254, 0.85),
+            0 0 48px rgba(129, 140, 248, 0.55);
+    }
+}
+
+/* The light the orb casts. Attached to the orb (not the masthead) so it can
+   paint above the top bar and header underline: .masthead has its own stacking
+   context, so a glow inside it could never rise above those lines. Inside the
+   orb's stacking context, z-index -1 keeps the glow just behind the icon while
+   both sit above the rest of the page. */
+.theme-orb::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 34rem;
+    height: 34rem;
+    margin-left: -17rem;
+    margin-top: -17rem;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+    background: radial-gradient(closest-side,
+            rgba(251, 191, 36, 0.19),
+            rgba(251, 146, 60, 0.10) 55%,
+            transparent 72%);
+    animation: glowBreathe calc(var(--sweep-dur) / 2) ease-in-out infinite;
+}
+
+html[data-theme="dark"] .theme-orb::before {
+    background: radial-gradient(closest-side,
+            rgba(226, 232, 255, 0.15),
+            rgba(129, 140, 248, 0.09) 55%,
+            transparent 72%);
+}
+
+@keyframes glowBreathe {
+
+    0%,
+    100% {
+        opacity: 0.75;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.08);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    #theme-icon.fa-sun,
+    #theme-icon.fa-moon,
+    .theme-orb::before {
+        animation: none !important;
+    }
+
+    .theme-orb:hover {
+        transform: none;
+    }
+}
+
+/* ---- Warm accent on metadata across the site ---------------------------- */
+/* Mirrors the CV dates: venue/year on publications and teaching, and post
+   dates in the blog archive. Scoped to .archive__item so the text always sits
+   on a frosted card (>=4.5:1); on bare aurora this red measures only 3.7:1. */
+.archive__item-title+p:not([class]),
+.archive__item .page__date {
+    color: var(--accent-2);
+    font-weight: 600;
+    letter-spacing: -0.005em;
+}
+
+.archive__item .page__date time {
+    color: var(--accent-2);
+}
+
+/* The venue sits inside the meta line; keep it italic but a touch stronger */
+.archive__item-title+p:not([class]) i {
+    font-style: italic;
+    font-weight: 700;
+}
+
+/* ---- Archive-layout pages ------------------------------------------------ */
+/* Publications, Teaching, Service and the CV render their content inside
+   .archive rather than .page__content, so the heading/rule styling above never
+   reached them. The `>` child selectors deliberately skip .archive__item-title,
+   which is also an h2 but lives inside a card. */
+.archive {
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+/* Section headings take the warm red. These are large text (>=24px), where the
+   3:1 threshold applies, so the lighter rose is comfortably readable. */
+.archive>h2,
+.archive>h3 {
+    color: var(--accent-2);
+}
+
+.archive>h2::after {
+    content: "";
+    display: block;
+    width: 3rem;
+    height: 4px;
+    margin-top: 0.5rem;
+    border-radius: 4px;
+    /* gradient + sweep animation come from the shared rule above */
+}
+
+.archive>hr {
+    height: 3px;
+    border: 0;
+    border-radius: 3px;
+    margin: 0.5rem 0 1.25rem;
+}
+
+/* The CV section headings now take the same gradient bar, so drop the plain
+   border they had. */
+.cv-section h2 {
+    border-bottom: 0;
+    padding-bottom: 0;
+    color: var(--accent-2);
+}
+
+/* Skill groups get the same frosted panel as the other cards. Besides matching
+   the rest of the site, it lifts the small red label to 5.9:1 (on bare aurora
+   it measured 4.1:1, under the 4.5 minimum). */
+.cv-skill-category {
+    padding: 0.9rem 1rem 1rem;
+    border-radius: 10px;
+    background: var(--panel);
+    -webkit-backdrop-filter: blur(7px) saturate(1.08);
+    backdrop-filter: blur(7px) saturate(1.08);
+}
+
+.cv-skill-category h3 {
+    color: var(--accent-red-deep);
+}
+
+.cv-section h2::after {
+    content: "";
+    display: block;
+    width: 3rem;
+    height: 4px;
+    margin-top: 0.5rem;
+    border-radius: 4px;
+    background-image: var(--grad-loop);
+    background-size: 200vw 100%;
+    background-repeat: repeat;
+    background-attachment: fixed;
+    animation: gradSweep var(--sweep-dur) linear infinite;
+}
+
+/* Bold text picks up the warm red. Uses a deeper shade than the metadata red
+   because emphasis often sits directly on the aurora with no card behind it
+   (measured 4.6:1 there, vs 3.7:1 for the lighter rose). */
+.page__content strong,
+.archive strong {
+    color: var(--accent-red-deep);
+}
+
+/* On a frosted card the lighter rose is readable, so keep emphasis consistent
+   with the metadata colour there. */
+.archive__item strong,
+.cv-item strong {
+    color: var(--accent-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .archive>h2::after,
+    .archive>hr,
+    .cv-section h2::after {
+        animation: none !important;
     }
 }

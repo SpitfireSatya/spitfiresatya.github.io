@@ -52,7 +52,7 @@ redirect_from:
   </div>
 
   <!-- Education -->
-  <div class="cv-section">
+  <div class="cv-section cv-timeline">
     <h2>Education</h2>
     <ul class="cv-list">
       <li class="cv-item">
@@ -161,7 +161,7 @@ redirect_from:
   </div>
 
   <!-- Work Experience -->
-  <div class="cv-section">
+  <div class="cv-section cv-timeline">
     <h2>Work Experience</h2>
     <ul class="cv-list">
       <li class="cv-item">
