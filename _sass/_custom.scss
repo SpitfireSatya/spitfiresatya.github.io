@@ -1311,3 +1311,145 @@ html[data-theme="dark"] .theme-orb::before {
         animation: none !important;
     }
 }
+
+/* ---- BibTeX cite block --------------------------------------------------- */
+.cite-block {
+    margin: 1.5rem 0;
+    border: 1px solid var(--global-border-color);
+    border-radius: 12px;
+    background: var(--panel);
+    -webkit-backdrop-filter: blur(7px) saturate(1.08);
+    backdrop-filter: blur(7px) saturate(1.08);
+    overflow: hidden;
+}
+
+.cite-block__summary {
+    cursor: pointer;
+    padding: 0.7rem 1rem;
+    font-family: "Space Grotesk", "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--accent-2);
+    list-style: none;
+    transition: background 0.18s ease;
+}
+
+.cite-block__summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Chevron that rotates when the block is open */
+.cite-block__summary::after {
+    content: "";
+    display: inline-block;
+    width: 0.45rem;
+    height: 0.45rem;
+    margin-left: 0.5rem;
+    vertical-align: 0.1rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+}
+
+.cite-block[open] .cite-block__summary::after {
+    transform: rotate(-135deg);
+}
+
+.cite-block__summary:hover {
+    background: var(--grad-soft);
+}
+
+.cite-block[open] .cite-block__summary {
+    border-bottom: 1px solid var(--global-border-color);
+}
+
+.cite-block__body {
+    position: relative;
+    padding: 0.75rem 1rem 1rem;
+}
+
+.cite-block__copy {
+    position: absolute;
+    top: 0.85rem;
+    right: 0.85rem;
+    z-index: 2;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.78rem;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    background: var(--global-bg-color);
+}
+
+.cite-block__copy.is-copied {
+    border-color: var(--accent-2);
+    color: var(--accent-2);
+}
+
+.cite-block__code {
+    margin: 0;
+    padding: 0.85rem 1rem;
+    overflow-x: auto;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    border-radius: 8px;
+    background: var(--global-code-background-color);
+    color: var(--global-code-text-color);
+}
+
+.cite-block__code code {
+    background: none;
+    padding: 0;
+    font-size: inherit;
+    white-space: pre;
+}
+
+/* ---- 404 page links ------------------------------------------------------ */
+.notfound-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 1.25rem 0 1.75rem;
+}
+
+/* ---- Whole-card click target --------------------------------------------- */
+/* "Stretched link": the card's primary link grows an invisible overlay across
+   the whole card. Only one real anchor is involved, so screen readers and
+   search engines still see a single, properly-labelled link, and no JS is
+   needed. Cards carry other links (Download Paper, course sites, the blog
+   permalink icon), so those are lifted above the overlay to stay clickable. */
+
+
+/* No overlay pseudo-element here on purpose. A stretched ::after would sit above
+   the card text and block selecting it (the excerpts are abstracts people may
+   want to copy), so the whole-card click is handled in JS instead, which also
+   lets it ignore clicks that are really text selections. Without JS the title
+   link still works exactly as before. */
+
+/* Only apply the pointer cursor once JS has wired the card up */
+.list__item .archive__item.is-clickable {
+    cursor: pointer;
+}
+
+/* Give the whole card the hover treatment when any part of it is hovered,
+   and mirror it for keyboard users focusing the primary link. */
+.list__item .archive__item:focus-within {
+    transform: translateY(-4px);
+    background: var(--grad-soft), var(--panel);
+    box-shadow: 0 16px 36px var(--glow);
+}
+
+.list__item .archive__item:focus-within::before {
+    opacity: 1;
+}
+
+/* The overlay already conveys focus on the card, so drop the ring from the
+   stretched link itself to avoid a full-card outline. */
+.list__item .archive__item-title a:first-child:focus-visible {
+    outline: none;
+}
+
+.list__item .archive__item:focus-within {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}

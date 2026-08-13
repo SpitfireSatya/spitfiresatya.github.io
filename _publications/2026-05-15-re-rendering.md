@@ -8,6 +8,16 @@ date: 2026-05-15
 venue: 'ICSE'
 paperurl: 'http://spitfiresatya.github.io/files/papers/icse_26_rerendering.pdf'
 citation: 'Farideh Khalili, Satyajit Gokhale, Alexi Turcotte, Dale Xu, and Frank Tip. <i>Remediating Superfluous Re-Rendering in React Applications</i> In Proceedings of the 48th International Conference on Software Engineering (ICSE). Association for Computing Machinery, New York, NY, USA. More information to come.'
+bibtex: |
+  @inproceedings{khalili2026rerendering,
+    author    = {Khalili, Farideh and Gokhale, Satyajit and Turcotte, Alexi
+                 and Xu, Dale and Tip, Frank},
+    title     = {Remediating Superfluous Re-Rendering in React Applications},
+    booktitle = {Proceedings of the 48th International Conference on Software Engineering (ICSE)},
+    publisher = {Association for Computing Machinery},
+    address   = {New York, NY, USA},
+    year      = {2026}
+  }
 ---
 
 React is an extremely popular framework for constructing user

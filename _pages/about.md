@@ -1,6 +1,7 @@
 ---
 permalink: /
 title: "About me"
+og_title: "Satyajit Gokhale — Applied Scientist & PL/SE Researcher"
 author_profile: true
 redirect_from: 
   - /about/

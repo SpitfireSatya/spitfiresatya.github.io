@@ -3,6 +3,86 @@
 <!-- Support for MathJax -->
 <script id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@4.0.0/tex-mml-chtml.js"></script>
 
+<!-- Make whole cards clickable. Done in JS rather than with a stretched CSS
+     overlay so that selecting the card's text still works, and so clicks that
+     are really text selections are ignored. Without JS the title link behaves
+     exactly as before. -->
+<script>
+  (function () {
+    var cards = document.querySelectorAll('.list__item .archive__item');
+    if (!cards.length) return;
+
+    cards.forEach(function (card) {
+      var title = card.querySelector('.archive__item-title');
+      var primary = title && title.querySelector('a');
+      if (!primary) return;
+
+      card.classList.add('is-clickable');
+
+      var activate = function (e) {
+        // Let real links/buttons handle their own clicks
+        if (e.target.closest('a, button, summary, input, textarea, select')) return;
+        // Don't hijack a text selection
+        var sel = window.getSelection();
+        if (sel && sel.toString().length > 0) return;
+
+        var newTab = e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1 ||
+          primary.target === '_blank';
+        if (newTab) {
+          window.open(primary.href, '_blank', 'noopener');
+        } else {
+          window.location.href = primary.href;
+        }
+      };
+
+      card.addEventListener('click', activate);
+      // Middle-click opens in a new tab, matching normal link behaviour
+      card.addEventListener('auxclick', function (e) {
+        if (e.button === 1) { e.preventDefault(); activate(e); }
+      });
+    });
+  })();
+</script>
+
+<!-- Copy-to-clipboard for BibTeX blocks (progressive enhancement: the <details>
+     block and the raw text work fine without this) -->
+<script>
+  (function () {
+    var buttons = document.querySelectorAll('[data-cite-copy]');
+    if (!buttons.length) return;
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var body = btn.closest('.cite-block__body');
+        var code = body && body.querySelector('code');
+        if (!code) return;
+        var text = code.innerText;
+        var done = function (ok) {
+          var original = btn.innerHTML;
+          btn.innerHTML = ok
+            ? '<i class="fas fa-check" aria-hidden="true"></i> Copied'
+            : '<i class="fas fa-triangle-exclamation" aria-hidden="true"></i> Press Cmd/Ctrl+C';
+          btn.classList.add('is-copied');
+          setTimeout(function () {
+            btn.innerHTML = original;
+            btn.classList.remove('is-copied');
+          }, 2000);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+        } else {
+          // Fallback: select the text so the user can copy it manually
+          var range = document.createRange();
+          range.selectNodeContents(code);
+          var sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+          done(false);
+        }
+      });
+    });
+  })();
+</script>
+
 <!-- Back-to-top button (injected via JS so it's absent without scripting) -->
 <script>
   (function () {

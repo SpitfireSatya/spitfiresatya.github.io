@@ -1,0 +1,19 @@
+{% comment %}
+BibTeX citation block for publications. Rendered only when a page defines a
+`bibtex` front-matter field. Uses <details> so it works without JavaScript;
+    the copy button is progressively enhanced by footer/custom.html.
+    {% endcomment %}
+    {% if page.bibtex %}
+    <details class="cite-block">
+        <summary class="cite-block__summary">
+            <i class="fas fa-quote-right" aria-hidden="true"></i> Cite this{% if page.doi %} &middot; BibTeX{% endif %}
+        </summary>
+        <div class="cite-block__body">
+            <button type="button" class="btn btn--inverse cite-block__copy" data-cite-copy
+                aria-label="Copy BibTeX to clipboard">
+                <i class="fas fa-copy" aria-hidden="true"></i> Copy
+            </button>
+            <pre class="cite-block__code"><code>{{ page.bibtex | strip }}</code></pre>
+        </div>
+    </details>
+    {% endif %}
