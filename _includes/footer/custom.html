@@ -19,12 +19,28 @@
 
       card.classList.add('is-clickable');
 
+      /* Remember where the press started so we can tell a click from a drag. */
+      var downX = 0, downY = 0;
+      card.addEventListener('mousedown', function (e) {
+        downX = e.clientX;
+        downY = e.clientY;
+      });
+
       var activate = function (e) {
-        // Let real links/buttons handle their own clicks
+        /* Let real links/buttons handle their own clicks */
         if (e.target.closest('a, button, summary, input, textarea, select')) return;
-        // Don't hijack a text selection
+
+        /* Ignore presses that were really drags, i.e. the user was selecting text. */
+        if (Math.abs(e.clientX - downX) > 6 || Math.abs(e.clientY - downY) > 6) return;
+
+        /* Ignore a click that lands on text the user has selected *in this card*. */
+        /* Scoping to the card matters: a leftover selection elsewhere on the page */
+        /* must not make every other card unclickable. */
         var sel = window.getSelection();
-        if (sel && sel.toString().length > 0) return;
+        if (sel && !sel.isCollapsed && sel.rangeCount) {
+          var node = sel.getRangeAt(0).commonAncestorContainer;
+          if (card === node || card.contains(node)) return;
+        }
 
         var newTab = e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1 ||
           primary.target === '_blank';
@@ -36,7 +52,7 @@
       };
 
       card.addEventListener('click', activate);
-      // Middle-click opens in a new tab, matching normal link behaviour
+      /* Middle-click opens in a new tab, matching normal link behaviour */
       card.addEventListener('auxclick', function (e) {
         if (e.button === 1) { e.preventDefault(); activate(e); }
       });
@@ -70,7 +86,7 @@
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
         } else {
-          // Fallback: select the text so the user can copy it manually
+          /* Fallback: select the text so the user can copy it manually */
           var range = document.createRange();
           range.selectNodeContents(code);
           var sel = window.getSelection();
