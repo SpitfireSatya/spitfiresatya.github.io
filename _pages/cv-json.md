@@ -27,21 +27,14 @@ redirect_from:
 <div class="cv-container">
   <!-- Basic Information -->
   <div class="cv-section cv-header">
-    <h1>Satyajit Shashank Gokhale</h1>
-    <h2>Software Craftsman, Cybersecurity Enthusiast, Programming Researcher</h2>
+    <h1>Satyajit Gokhale</h1>
 
     <div class="cv-contact">
       <div class="cv-contact-item">
-        <i class="fas fa-envelope"></i> gokhalesatyajits@gmail.com
+        <i class="fas fa-envelope"></i> satyagokhale@acm.org
       </div>
       <div class="cv-contact-item">
-        <i class="fas fa-envelope"></i> gokhale.sa@northeastern.edu
-      </div>
-      <div class="cv-contact-item">
-        <i class="fas fa-phone"></i> (617) 407-8924
-      </div>
-      <div class="cv-contact-item">
-        <i class="fas fa-map-marker-alt"></i> Boston, MA, 02215, US
+        <i class="fas fa-map-marker-alt"></i> Santa Clara, CA
       </div>
     </div>
 

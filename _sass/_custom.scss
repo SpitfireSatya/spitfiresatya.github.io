@@ -1,0 +1,535 @@
+/* ==========================================================================
+   CUSTOM POLISH LAYER  (loaded last)
+   Vivid, gradient-forward styling built on the theme's --global-* variables
+   so it works in both light and dark. Deliberately does NOT touch masthead
+   positioning (the theme relies on position: fixed).
+   ========================================================================== */
+
+/* ---- Vibrant accent system ---------------------------------------------- */
+:root {
+    --accent: #4f46e5;
+    /* indigo */
+    --accent-2: #db2777;
+    /* pink   */
+    --grad: linear-gradient(120deg, #06b6d4 0%, #6366f1 45%, #d946ef 100%);
+    --grad-soft: linear-gradient(120deg, rgba(6, 182, 212, 0.10), rgba(99, 102, 241, 0.10), rgba(217, 70, 239, 0.10));
+    --glow: rgba(99, 102, 241, 0.28);
+    --sidebar-text: #23293a;
+}
+
+html[data-theme="dark"] {
+    --accent: #a5b4fc;
+    --accent-2: #f0abfc;
+    --grad: linear-gradient(120deg, #22d3ee 0%, #818cf8 45%, #e879f9 100%);
+    --grad-soft: linear-gradient(120deg, rgba(34, 211, 238, 0.14), rgba(129, 140, 248, 0.14), rgba(232, 121, 249, 0.14));
+    --glow: rgba(129, 140, 248, 0.40);
+    --sidebar-text: #f2f4f8;
+}
+
+/* ---- Typography --------------------------------------------------------- */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.003em;
+}
+
+h1,
+h2,
+h3,
+h4,
+.page__title,
+.archive__item-title,
+.author__name,
+.cv-item-title {
+    font-family: "Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: -0.02em;
+}
+
+.page__content {
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+/* Reusable gradient-text helper applied to the boldest headings */
+.page__title,
+.cv-header h1,
+.author__name {
+    background: var(--grad);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+/* Section headings: colored text + gradient underline bar */
+.page__content h1,
+.page__content h2 {
+    color: var(--accent);
+}
+
+.page__content h1::after,
+.page__content h2::after {
+    content: "";
+    display: block;
+    width: 3rem;
+    height: 4px;
+    margin-top: 0.5rem;
+    border-radius: 4px;
+    background: var(--grad);
+}
+
+/* ---- Animated gradient bar across the very top of the page -------------- */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    z-index: 1000;
+    background: var(--grad);
+    background-size: 200% 100%;
+    animation: slideGrad 7s linear infinite;
+}
+
+@keyframes slideGrad {
+    0% {
+        background-position: 0% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* ---- Ambient background: soft accent "aurora" + faint dot grid ---------- */
+/* Fixed, behind all content. Subtle enough that text stays readable and the
+   solid white cards visibly pop against it. */
+/* A fixed, full-viewport layer at z-index:-1 keeps the aurora static (no
+   scrolling) and covering the whole page. body's background must be
+   transparent so it doesn't paint over this negative-z layer; html then
+   provides the base color (adapts to light/dark via --global-bg-color). */
+body {
+    background-color: transparent;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: transparent;
+    background-image:
+        radial-gradient(50rem 50rem at 4% -8%, rgba(6, 182, 212, 0.30), transparent 62%),
+        radial-gradient(46rem 46rem at 100% 2%, rgba(217, 70, 239, 0.26), transparent 62%),
+        radial-gradient(52rem 52rem at 96% 100%, rgba(99, 102, 241, 0.26), transparent 60%),
+        radial-gradient(40rem 40rem at 20% 108%, rgba(6, 182, 212, 0.20), transparent 60%),
+        radial-gradient(46rem 46rem at 50% 48%, rgba(139, 92, 246, 0.16), transparent 62%),
+        radial-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 24px 24px;
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+}
+
+html[data-theme="dark"] body::after {
+    background-image:
+        radial-gradient(50rem 50rem at 4% -8%, rgba(34, 211, 238, 0.34), transparent 62%),
+        radial-gradient(46rem 46rem at 100% 2%, rgba(232, 121, 249, 0.30), transparent 62%),
+        radial-gradient(52rem 52rem at 96% 100%, rgba(129, 140, 248, 0.32), transparent 60%),
+        radial-gradient(40rem 40rem at 20% 108%, rgba(34, 211, 238, 0.24), transparent 60%),
+        radial-gradient(46rem 46rem at 50% 48%, rgba(167, 139, 250, 0.22), transparent 62%),
+        radial-gradient(rgba(129, 140, 248, 0.10) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 24px 24px;
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+}
+
+/* ---- Header / navigation color (no positioning changes) ----------------- */
+.masthead::after {
+    height: 3px;
+    background: var(--grad);
+}
+
+/* Brand / name in the nav gets the gradient treatment */
+.greedy-nav .visible-links li:first-child a {
+    font-weight: 800;
+    background: var(--grad);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Nav hover underline uses the gradient */
+.greedy-nav .visible-links a::before {
+    background: var(--grad);
+    height: 3px;
+}
+
+.masthead__menu-item.selected a {
+    color: var(--accent) !important;
+    border-bottom-color: var(--accent) !important;
+}
+
+/* ---- Links: animated gradient underline --------------------------------- */
+.page__content a:not(.btn) {
+    color: var(--accent);
+    text-decoration: none;
+    background-image: var(--grad);
+    background-size: 0% 2px;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    transition: background-size 0.25s ease, opacity 0.2s ease;
+}
+
+.page__content a:not(.btn):hover {
+    background-size: 100% 2px;
+    opacity: 0.85;
+}
+
+::selection {
+    background: rgba(99, 102, 241, 0.22);
+}
+
+/* ---- Buttons ------------------------------------------------------------ */
+.btn--primary,
+.cv-download-links .btn--primary {
+    background: var(--grad) !important;
+    background-size: 200% auto !important;
+    border: 0;
+    border-radius: 10px;
+    font-weight: 600;
+    color: #fff !important;
+    box-shadow: 0 6px 18px var(--glow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-position 0.4s ease;
+}
+
+.btn--primary:hover,
+.cv-download-links .btn--primary:hover {
+    transform: translateY(-2px);
+    background-position: right center !important;
+    box-shadow: 0 12px 28px var(--glow);
+}
+
+.btn {
+    border-radius: 10px;
+    transition: transform 0.15s ease;
+}
+
+.btn--inverse:hover {
+    transform: translateY(-2px);
+}
+
+/* ---- Author sidebar ----------------------------------------------------- */
+/* Gradient ring drawn INSIDE the element (via padding + background) so it
+   never overflows the sidebar, which clips horizontally (overflow-y: auto). */
+.author__avatar img {
+    border-radius: 50%;
+    padding: 5px;
+    border: 0 !important;
+    background: var(--grad);
+    background-size: 200% 200%;
+    background-position: 0% 50%;
+    transition: background-position 0.5s ease;
+}
+
+.author__avatar img:hover {
+    background-position: 100% 50%;
+}
+
+.author__name {
+    font-weight: 800;
+}
+
+/* ---- Archive / list cards (Publications, Teaching, Service) ------------- */
+.list__item {
+    margin-bottom: 1rem;
+}
+
+.archive__item {
+    position: relative;
+    padding: 1.2rem 1.3rem 1.2rem 1.5rem;
+    border: 1px solid var(--global-border-color);
+    border-radius: 12px;
+    background: var(--global-bg-color);
+    overflow: hidden;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.archive__item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--grad);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.list__item .archive__item:hover {
+    transform: translateY(-4px);
+    background: var(--grad-soft);
+    box-shadow: 0 16px 36px var(--glow);
+}
+
+.list__item .archive__item:hover::before {
+    opacity: 1;
+}
+
+.archive__item-title {
+    margin-top: 0;
+}
+
+.archive__item-title a {
+    background: none !important;
+    color: var(--accent);
+}
+
+/* ---- Hand-authored CV (json page) cards --------------------------------- */
+.cv-section {
+    margin-bottom: 2.25rem;
+}
+
+.cv-section h2 {
+    color: var(--accent);
+    padding-bottom: 0.35rem;
+    border-bottom: 2px solid var(--global-border-color);
+}
+
+.cv-item {
+    position: relative;
+    padding: 0.85rem 1rem 0.85rem 1.15rem;
+    border-radius: 10px;
+    border-left: 3px solid transparent;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.cv-item:hover {
+    background: var(--grad-soft);
+    border-left-color: var(--accent);
+    transform: translateX(4px);
+}
+
+.cv-item-title {
+    font-weight: 600;
+}
+
+.cv-item-date {
+    color: var(--accent-2);
+    font-weight: 700;
+}
+
+.cv-profiles a {
+    transition: transform 0.15s ease;
+}
+
+.cv-profiles a:hover {
+    transform: translateY(-2px);
+}
+
+/* ---- Footer: slimmer + gradient top edge -------------------------------- */
+.page__footer {
+    margin-top: 1.5em;
+    border-top: 0;
+}
+
+.page__footer::before {
+    content: "";
+    display: block;
+    height: 3px;
+    background: var(--grad);
+}
+
+.page__footer footer {
+    margin-top: 0.6em;
+    padding: 0 1em 0.6em;
+}
+
+.page__footer-follow li {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.page__footer-copyright {
+    line-height: 1.5;
+    opacity: 0.85;
+}
+
+/* ---- Misc polish -------------------------------------------------------- */
+blockquote {
+    border-left: 4px solid transparent;
+    border-image: var(--grad) 1;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.page__content {
+    animation: fadeInUp 0.5s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    body::before {
+        animation: none;
+    }
+
+    .page__content {
+        animation: none;
+    }
+
+    .author__avatar img:hover,
+    .list__item .archive__item:hover,
+    .cv-item:hover,
+    .btn:hover,
+    .btn--primary:hover,
+    .btn--inverse:hover {
+        transform: none;
+    }
+}
+
+/* ---- Scroll-reveal (JS adds .reveal, then .is-visible) ------------------ */
+.reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+    will-change: opacity, transform;
+}
+
+.reveal.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* ---- Skill pills (JSON CV) ---------------------------------------------- */
+.cv-skills {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.cv-skill-category h3 {
+    margin-bottom: 0.5rem;
+    color: var(--accent);
+    font-size: 1rem;
+}
+
+.cv-skill-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    margin: 0;
+}
+
+.cv-skill-list li {
+    padding: 0.28rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--global-text-color);
+    background: var(--grad-soft);
+    border: 1px solid var(--global-border-color);
+    border-radius: 999px;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cv-skill-list li:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: 0 6px 16px var(--glow);
+}
+
+/* ---- Sidebar refresh ---------------------------------------------------- */
+.sidebar {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--sidebar-text);
+}
+
+.sidebar .author__name {
+    font-size: 1.5rem;
+    margin-bottom: 0.35rem;
+}
+
+.author__pronouns {
+    display: inline-block;
+    margin: 0 0 0.5rem;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--grad-soft);
+    border-radius: 999px;
+}
+
+.author__bio {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    font-weight: 600;
+    color: var(--sidebar-text);
+}
+
+.author__urls-wrapper .btn--inverse {
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 999px;
+    font-weight: 600;
+    transition: background 0.18s ease, color 0.18s ease, transform 0.15s ease;
+}
+
+.author__urls-wrapper .btn--inverse:hover {
+    background: var(--grad);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.author__urls li {
+    padding: 0.14rem 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--sidebar-text);
+}
+
+.author__urls li a {
+    color: var(--sidebar-text);
+    font-weight: 600;
+    transition: color 0.15s ease;
+}
+
+.author__urls li a:hover {
+    color: var(--accent);
+}
+
+.author__urls li a .icon-pad-right,
+.author__urls li .icon-pad-right {
+    color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal {
+        opacity: 1;
+        transform: none;
+    }
+}
