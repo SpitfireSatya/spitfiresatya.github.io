@@ -48,6 +48,7 @@ so use it verbatim for the browser tab instead of appending site.title. {% endco
 {% if page.date %}
 <meta property="article:published_time" content="{{ page.date | date_to_xmlschema }}">
 {% endif %}
+<meta property="article:author" content="{{ site.author.name | default: site.name }}">
 
 {% if seo_url %}
 <link rel="canonical" href="{{ page.url | prepend: seo_url | replace: " /index.html", "/" }}">
@@ -126,6 +127,8 @@ so use it verbatim for the browser tab instead of appending site.title. {% endco
   content="{{ page.og_title | default: page.title | default: site.title | markdownify | strip_html | strip_newlines | escape_once }}">
 {% if page.date %}
 <meta property="og:type" content="article">
+{% else %}
+<meta property="og:type" content="website">
 {% endif %}
 {% if page.excerpt %}
 <meta property="og:description" name="description" content="{{ seo_description }}">
