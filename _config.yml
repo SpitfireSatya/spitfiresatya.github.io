@@ -192,6 +192,7 @@ exclude:
   - LICENSE
   - local
   - log
+  - markdown_generator # Local tooling for generating publication markdown; not web content
   - node_modules
   - package.json*
   - Rakefile
