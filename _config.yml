@@ -12,7 +12,7 @@ site_theme               : "default" # The available themes options are "default
 title                    : "Satyajit Gokhale"
 title_separator          : "-"
 name                     : &name "Satyajit Gokhale"
-description              : &description "Satyajit Gokhale's academic portfolio"   # Update this with a general description of your site, this is the default if not overridden by a page
+description              : &description "Satyajit Gokhale is an Applied Scientist at Amazon Web Services working on automated reasoning for code migrations. PhD in Computer Science from Northeastern University, researching programming languages and software engineering."   # Update this with a general description of your site, this is the default if not overridden by a page
 url                      : https://spitfiresatya.github.io # The base hostname & protocol for your site e.g. "https://[your GitHub username].github.io",
                                                            # or if you already have some other page hosted on Github then use "https://[your GitHub username].github.io/[Your Repo Name]"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
@@ -66,7 +66,7 @@ author:
   keybase          : # Username
   instagram        : # Username
   lastfm           : # Username
-  linkedin         : https://www.linkedin.com/in/gokhalesatyajits/
+  linkedin         : gokhalesatyajits # Username only; the template prepends https://www.linkedin.com/in/
   mastodon         : # URL
   medium           : "https://medium.com/@twisterintwist"
   pinterest        : # Username
@@ -149,9 +149,14 @@ og_description           : "Applied Scientist at Amazon Web Services working on 
 # For specifying social profiles
 # - https://developers.google.com/structured-data/customize/social-profiles
 social:
-  type                   : # Person or Organization (defaults to Person)
-  name                   : # If the user or organization name differs from the site's name
-  links: # An array of links to social media profiles
+  type                   : Person # Person or Organization (defaults to Person)
+  name                   : "Satyajit Gokhale" # If the user or organization name differs from the site's name
+  links: # Profiles that refer to the same person; emitted as schema.org "sameAs"
+    - "https://www.linkedin.com/in/gokhalesatyajits/"
+    - "https://github.com/SpitfireSatya"
+    - "https://scholar.google.com/citations?user=d6OGDlwAAAAJ&hl=en"
+    - "https://orcid.org/0009-0001-8525-360X"
+    - "https://medium.com/@twisterintwist"
 
 
 # Analytics
