@@ -406,7 +406,7 @@ redirect_from:
       </li>
       <li class="cv-item">
         <div class="cv-item-content">
-          <div class="cv-item-title">Program Committee, Research Track</div>
+          <div class="cv-item-title">Review Committee</div>
           <div class="cv-item-detail">OOPSLA 2026</div>
         </div>
       </li>
@@ -414,6 +414,24 @@ redirect_from:
         <div class="cv-item-content">
           <div class="cv-item-title">Program Committee, Research Track</div>
           <div class="cv-item-detail">ISSTA 2026</div>
+        </div>
+      </li>
+      <li class="cv-item">
+        <div class="cv-item-content">
+          <div class="cv-item-title">Session Chair, Compiler Analysis and Transformation</div>
+          <div class="cv-item-detail">OOPSLA 2026</div>
+        </div>
+      </li>
+      <li class="cv-item">
+        <div class="cv-item-content">
+          <div class="cv-item-title">Session Chair, Mutation Testing and Assertion Generation</div>
+          <div class="cv-item-detail">ISSTA 2026</div>
+        </div>
+      </li>
+      <li class="cv-item">
+        <div class="cv-item-content">
+          <div class="cv-item-title">Judge, Student Research Competition</div>
+          <div class="cv-item-detail">SPLASH/ISSTA 2026</div>
         </div>
       </li>
     </ul>
