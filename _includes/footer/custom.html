@@ -99,6 +99,24 @@
   })();
 </script>
 
+<!-- Keep the theme toggle's label in step with the theme, whichever script
+     changes it (first paint, the toggle, or the OS preference) -->
+<script>
+  (function () {
+    var btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+    var root = document.documentElement;
+    var sync = function () {
+      var label = root.getAttribute('data-theme') === 'dark'
+        ? 'Switch to light mode' : 'Switch to dark mode';
+      btn.setAttribute('aria-label', label);
+      btn.setAttribute('title', label);
+    };
+    sync();
+    new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  })();
+</script>
+
 <!-- Back-to-top button (injected via JS so it's absent without scripting) -->
 <script>
   (function () {

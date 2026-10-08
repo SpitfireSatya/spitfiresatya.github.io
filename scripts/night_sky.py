@@ -20,27 +20,36 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SPACE = np.array([6, 5, 15], float)          # keep in sync with --global-bg-color
 
 VARIANTS = {
-    # name: size, cloud lobes (x, y, sx, sy, angle, weight) in 0-1 units,
-    # the box (0-1 units) where content sits, and the cloud strength there
+    # size; cloud lobes (x, y, sx, sy, angle, weight) in 0-1 units; calm boxes
+    # (x0, y0, x1, y1, cloud strength inside) where page content sits; the
+    # number of stars; and bright four-point stars (x, y, brightness).
+    # 16:10 so a typical laptop window (1440x900) shows the full width: at
+    # 16:9, background-size: cover cropped away most of the left cloud.
     "night-sky": dict(
-        size=(2400, 1350),
-        lobes=[(0.93, 0.30, 0.16, 0.36, -0.35, 1.0),
-               (0.88, 0.86, 0.14, 0.22, 0.4, 0.75),
-               (0.02, 0.58, 0.07, 0.30, 0.2, 0.7),
-               (0.10, 1.02, 0.18, 0.14, -0.3, 0.8),
-               (0.50, 0.55, 0.45, 0.20, -0.15, 0.35)],
-        content=(0.06, 0.07, 0.79, 1.0),
-        inside=0.22,
-        stars=2600,
+        size=(2400, 1500),
+        lobes=[(0.94, 0.28, 0.13, 0.34, -0.35, 1.0),     # right, below the moon
+               (0.90, 0.88, 0.12, 0.20, 0.4, 0.8),
+               (0.02, 0.30, 0.10, 0.30, 0.25, 1.0),     # left, mirrored
+               (0.06, 0.92, 0.14, 0.18, -0.4, 0.9),
+               (0.50, 0.55, 0.45, 0.20, -0.15, 0.30)],  # faint bridge
+        boxes=[(0.235, 0.07, 0.785, 1.0, 0.18),          # main column
+               (0.065, 0.07, 0.215, 0.62, 0.50)],        # sidebar
+        stars=3200,
+        # none in the top-right: the theme toggle is drawn as a cross star
+        # there and must be the only one, or it reads as a double star
+        crosses=[(0.975, 0.62, 1.0), (0.03, 0.07, 0.85), (0.025, 0.74, 0.6),
+                 (0.93, 0.97, 0.5), (0.20, 0.96, 0.45)],
     ),
     "night-sky-portrait": dict(
         size=(1080, 1920),
         lobes=[(0.95, 0.10, 0.30, 0.12, -0.5, 1.0),
-               (0.05, 0.92, 0.32, 0.12, 0.4, 0.85),
+               (0.05, 0.92, 0.32, 0.12, 0.4, 1.0),
+               (0.02, 0.45, 0.10, 0.16, 0.2, 0.5),
+               (0.98, 0.62, 0.10, 0.16, -0.2, 0.5),
                (0.55, 0.50, 0.50, 0.25, -0.6, 0.3)],
-        content=(0.04, 0.0, 0.96, 1.0),
-        inside=0.30,
-        stars=1300,
+        boxes=[(0.04, 0.0, 0.96, 1.0, 0.28)],
+        stars=1500,
+        crosses=[(0.12, 0.80, 0.7), (0.92, 0.70, 0.5)],
     ),
 }
 
@@ -65,7 +74,7 @@ def screen(a, layer):
     return 255 - (255 - a) * (255 - np.clip(layer, 0, 255)) / 255.0
 
 
-def render(name, size, lobes, content, inside, stars):
+def render(name, size, lobes, boxes, stars, crosses):
     W, H = size
     rng = np.random.default_rng(78)
     yy, xx = np.mgrid[0:H, 0:W].astype(float)
@@ -87,21 +96,24 @@ def render(name, size, lobes, content, inside, stars):
     core = np.clip(dens - 0.45, 0, None) ** 1.2 * 2.2
 
     # dust: broad feathery patches plus soft filaments
-    patch = np.clip((fbm(rng, W, H, 5, 6, 0.62) - 0.56) / 0.16, 0, 1) ** 1.5
+    patch = np.clip((fbm(rng, W, H, 7, 6, 0.66) - 0.55) / 0.24, 0, 1) ** 1.3
     fil = (1 - np.abs(2 * fbm(rng, W, H, 3, 6, 0.65) - 1)) ** 4
     fil *= np.clip((fbm(rng, W, H, 4, 3) - 0.45) / 0.2, 0, 1)
-    absorb = np.clip(0.85 * patch + 0.45 * fil, 0, 0.88) * np.clip(dens / 0.6, 0, 1)
+    absorb = np.clip(0.7 * patch + 0.5 * fil, 0, 0.75) * np.clip(dens / 0.6, 0, 1)
     dens *= 1 - absorb
     core *= 1 - absorb
 
-    # keep the content area calm: distance (in px) outside the content box
-    x0, y0, x1, y1 = content
-    ox = np.maximum(np.maximum(x0 - u, u - x1), 0) * W
-    oy = np.maximum(np.maximum(y0 - v, v - y1), 0) * H
-    # wide smoothstep falloff: a narrow one leaves a hard vertical edge
-    out = np.clip(np.hypot(ox, oy) / (0.17 * W), 0, 1)
-    out = out * out * (3 - 2 * out)
-    scrim = inside + (1 - inside) * out
+    # keep the content areas calm, with a wide smoothstep falloff (a narrow
+    # one leaves a hard vertical edge); `out` is 0 inside any box, 1 far away
+    scrim = np.ones((H, W))
+    out = np.ones((H, W))
+    for x0, y0, x1, y1, inside in boxes:
+        ox = np.maximum(np.maximum(x0 - u, u - x1), 0) * W
+        oy = np.maximum(np.maximum(y0 - v, v - y1), 0) * H
+        o = np.clip(np.hypot(ox, oy) / (0.12 * W), 0, 1)
+        o = o * o * (3 - 2 * o)
+        scrim = np.minimum(scrim, inside + (1 - inside) * o)
+        out = np.minimum(out, o)
     dens *= scrim
     core *= scrim ** 3
 
@@ -117,15 +129,15 @@ def render(name, size, lobes, content, inside, stars):
     col = (violet * (1 - t) + magenta * t) * (1 - refl[..., None]) + blue * refl[..., None]
 
     img = np.zeros((H, W, 3)) + SPACE
-    img = screen(img, col * np.clip(dens, 0, 1.0)[..., None] * 0.8)
-    img = screen(img, lav * np.clip(core, 0, 1)[..., None] * 0.4)
+    img = screen(img, col * np.clip(dens, 0, 1.0)[..., None] * 1.05)
+    img = screen(img, lav * np.clip(core, 0, 0.8)[..., None] * 0.6)
 
     # starfield: warm/white/blue, power-law brightness, sparse behind content
     tints = [np.array(c, float) for c in
              ((255, 214, 170), (255, 245, 235), (205, 220, 255), (255, 190, 140))]
     for _ in range(stars):
         x, y = rng.uniform(0, W), rng.uniform(0, H)
-        inside_box = x0 * W < x < x1 * W and y0 * H < y < y1 * H
+        inside_box = out[min(int(y), H - 1), min(int(x), W - 1)] < 0.5
         if inside_box and rng.uniform() > 0.4:
             continue
         b = min(rng.pareto(2.0) * 0.35 + 0.14, 1.0) * (0.45 if inside_box else 1.0)
@@ -137,6 +149,24 @@ def render(name, size, lobes, content, inside, stars):
         g = np.exp(-((sx - x) ** 2 + (sy - y) ** 2) / (rad * rad * 0.6))
         c = tints[rng.integers(len(tints))]
         img[ya:yb, xa:xb] = screen(img[ya:yb, xa:xb], c * np.clip(g * b * 1.6, 0, 1)[..., None])
+
+    # a few bright stars with the four-point cross from the reference photo
+    k = W / 1584                      # scale relative to the cover's width
+    for cx, cy, b in crosses:
+        x, y = cx * W, cy * H
+        L = 34 * b * k
+        win = int(L * 3)
+        xa, xb = max(0, int(x) - win), min(W, int(x) + win + 1)
+        ya, yb = max(0, int(y) - win), min(H, int(y) + win + 1)
+        sy, sx = np.mgrid[ya:yb, xa:xb].astype(float)
+        dx, dy = sx - x, sy - y
+        w = 0.5 * k
+        acc = (np.exp(-np.abs(dx) / L) * np.exp(-(dy / w) ** 2)
+               + np.exp(-np.abs(dy) / L) * np.exp(-(dx / w) ** 2))
+        rr2 = (dx * dx + dy * dy) / (k * k)
+        acc += 1.5 * np.exp(-rr2 / (2.0 * b + 0.4)) + 0.3 * np.exp(-rr2 / (50 * b))
+        img[ya:yb, xa:xb] = screen(img[ya:yb, xa:xb],
+                                   np.array([240, 235, 255.]) * np.clip(acc * b, 0, 1)[..., None])
 
     out_path = os.path.join(REPO, "images", f"{name}.webp")
     Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGB").save(

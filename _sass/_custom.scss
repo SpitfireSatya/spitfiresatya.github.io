@@ -31,18 +31,8 @@
     /* Single source of truth for animation timing: the line sweep and the
        aurora drift both use this, so they can never fall out of sync. */
     --sweep-dur: 24s;
-    /* Position of the sun/moon orb. Shared by the orb itself and by the masks
-       that fade the gradient lines out around it. */
-    /* Nudged down/left of the true corner: the glow circle is clipped by the
-       top and right viewport edges, so its *visible* centre sits lower-left of
-       its geometric centre. This places the orb in that visual centre. */
-    --orb-right: 7.5rem;
-    --orb-top: 5rem;
-    --orb-size: 3.6rem;
-    /* How far the light "erases" the gradient lines around the orb:
-       --orb-mask is the full falloff radius, --orb-clear the fully-hidden part. */
-    --orb-mask: 17rem;
-    --orb-clear: 58%;
+    /* Scale of the nav-bar theme switch; its cells are 0.62 of this */
+    --orb-size: 3.2rem;
     /* Seamless (palindromic) gradients so they tile without a hard seam,
        used by the synchronized sweep animation. */
     --grad-loop: linear-gradient(90deg, #06b6d4, #3b82f6, #6366f1, #3b82f6, #06b6d4);
@@ -279,25 +269,6 @@ body::before {
     z-index: 1000;
 }
 
-/* Fade the top bar and the header underline out around the sun/moon. Painting
-   the glow above them isn't enough: the glow is translucent, so the lines still
-   showed through. Masking removes those pixels entirely, so the light reads as
-   washing the lines out. Mask coordinates are element-relative; the header
-   underline sits ~4.2rem below the viewport top, hence the offset. */
-body::before {
-    -webkit-mask-image: radial-gradient(var(--orb-mask) var(--orb-mask) at calc(100% - var(--orb-right)) var(--orb-top),
-            transparent 0 var(--orb-clear), #000 100%);
-    mask-image: radial-gradient(var(--orb-mask) var(--orb-mask) at calc(100% - var(--orb-right)) var(--orb-top),
-            transparent 0 var(--orb-clear), #000 100%);
-}
-
-.masthead::after {
-    -webkit-mask-image: radial-gradient(var(--orb-mask) var(--orb-mask) at calc(100% - var(--orb-right)) calc(var(--orb-top) - 4.2rem),
-            transparent 0 var(--orb-clear), #000 100%);
-    mask-image: radial-gradient(var(--orb-mask) var(--orb-mask) at calc(100% - var(--orb-right)) calc(var(--orb-top) - 4.2rem),
-            transparent 0 var(--orb-clear), #000 100%);
-}
-
 /* ---- Ambient background: soft accent "aurora" + faint dot grid ---------- */
 /* Fixed, behind all content. Subtle enough that text stays readable and the
    solid white cards visibly pop against it. */
@@ -403,10 +374,6 @@ html[data-theme="dark"]::after {
     inset: 0;
     z-index: -1;
     background-color: var(--global-bg-color);
-    -webkit-mask-image: radial-gradient(var(--orb-mask) var(--orb-mask) at calc(100% - var(--orb-right)) var(--orb-top),
-            transparent 0 var(--orb-clear), #000 100%);
-    mask-image: radial-gradient(var(--orb-mask) var(--orb-mask) at calc(100% - var(--orb-right)) var(--orb-top),
-            transparent 0 var(--orb-clear), #000 100%);
 }
 
 /* Brand / name in the nav gets the gradient treatment */
@@ -1042,34 +1009,128 @@ button:focus:not(:focus-visible) {
     }
 }
 
-/* ---- Sun / moon theme toggle -------------------------------------------- */
-/* A fixed celestial body sitting at the centre of the corner glow. The glow is
-   centred at (right: 5rem, top: 3rem); the negative margins below place this
-   orb's centre on exactly that point. */
-.theme-orb {
-    position: fixed;
-    top: var(--orb-top);
-    right: var(--orb-right);
-    width: var(--orb-size);
-    height: var(--orb-size);
-    margin: calc(var(--orb-size) / -2) calc(var(--orb-size) / -2) 0 0;
+/* ---- Theme switch (right end of the nav bar) ---------------------------- */
+/* The nav and the switch share one row: the nav takes the free width (the
+   greedy-nav script measures it, so links collapse into the menu before they
+   reach the switch) and the switch sits at the end. */
+.masthead__menu {
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 0;
-    border: 0;
-    border-radius: 50%;
-    background: transparent;
+    gap: 1rem;
+}
+
+.masthead__menu #site-nav {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.theme-orb {
+    position: relative;
+    flex: none;
+    /* a pill: two icon cells side by side, knob behind the active one */
+    --sw-pad: 0.2rem;
+    --sw-cell: calc(var(--orb-size) * 0.62);
+    width: calc(var(--sw-cell) * 2 + var(--sw-pad) * 2 + 2px);
+    height: calc(var(--sw-cell) + var(--sw-pad) * 2 + 2px);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--sw-pad);
+    border: 1px solid rgba(49, 46, 129, 0.22);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.55);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 10px rgba(49, 46, 129, 0.12);
     cursor: pointer;
     /* Above the animated top bar (1000) and the masthead (20), so neither the
-       sweep lines nor the header border cut across the sun/moon or its glow. */
+       sweep lines nor the header border cut across the switch or its glow. */
     z-index: 1001;
-    transition: transform 0.25s ease;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     -webkit-tap-highlight-color: transparent;
 }
 
+html[data-theme="dark"] .theme-orb {
+    border-color: rgba(196, 181, 253, 0.32);
+    background: rgba(6, 5, 15, 0.45);
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
+}
+
 .theme-orb:hover {
-    transform: rotate(-18deg) scale(1.14);
+    transform: scale(1.06);
+    border-color: rgba(49, 46, 129, 0.4);
+}
+
+html[data-theme="dark"] .theme-orb:hover {
+    border-color: rgba(196, 181, 253, 0.6);
+}
+
+.theme-orb:focus-visible {
+    outline: 2px solid #4338ca;
+    outline-offset: 4px;
+}
+
+/* The knob: a glowing disc that slides to whichever mode is active */
+.theme-switch__knob {
+    position: absolute;
+    top: 50%;
+    left: var(--sw-pad);
+    width: var(--sw-cell);
+    height: var(--sw-cell);
+    margin-top: calc(var(--sw-cell) / -2);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 251, 235, 1) 0%, rgba(254, 243, 199, 0.95) 55%, rgba(253, 230, 138, 0.9) 100%);
+    box-shadow: 0 0 12px rgba(251, 191, 36, 0.55);
+    transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1), background 0.4s ease, box-shadow 0.4s ease;
+}
+
+html[data-theme="dark"] .theme-switch__knob {
+    transform: translateX(var(--sw-cell));
+    background: radial-gradient(circle, rgba(76, 58, 140, 0.95) 0%, rgba(40, 30, 85, 0.95) 70%, rgba(30, 22, 64, 0.95) 100%);
+    box-shadow: 0 0 14px rgba(167, 139, 250, 0.55);
+}
+
+.theme-switch__icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--sw-cell);
+    height: var(--sw-cell);
+    transition: opacity 0.3s ease;
+}
+
+/* The inactive side recedes but stays legible, so both choices are visible */
+.theme-switch__icon--sun i {
+    font-size: calc(var(--sw-cell) * 0.6);
+    line-height: 1;
+    color: #f59e0b;
+}
+
+/* Stays amber when inactive: a grey sun glyph at this size reads as a
+   settings cog */
+html[data-theme="dark"] .theme-switch__icon--sun {
+    opacity: 0.5;
+}
+
+html:not([data-theme="dark"]) .theme-switch__icon--star {
+    opacity: 0.6;
+}
+
+/* ...and keeps its spikes inside the pill until it's the active mode */
+html:not([data-theme="dark"]) .theme-star {
+    transform: scale(0.62);
+}
+
+/* The star's gradients are white for the night sky; on the light pill tint
+   them indigo so the inactive star is still visible */
+html:not([data-theme="dark"]) .theme-star stop {
+    stop-color: #4338ca;
+}
+
+html:not([data-theme="dark"]) .theme-star__halo {
+    display: none;
 }
 
 #theme-icon {
@@ -1083,11 +1144,9 @@ button:focus:not(:focus-visible) {
     font-size: 2rem;
 }
 
-/* Nudge inward on small screens so it clears the nav's collapse button */
+/* A touch smaller on phones, where the nav row is tight */
 @media screen and (max-width: 37.5em) {
     :root {
-        --orb-right: 4.5rem;
-        --orb-top: 4rem;
         --orb-size: 2.9rem;
     }
 
@@ -1156,61 +1215,110 @@ button:focus:not(:focus-visible) {
     }
 }
 
-/* The light the orb casts. Attached to the orb (not the masthead) so it can
-   paint above the top bar and header underline: .masthead has its own stacking
-   context, so a glow inside it could never rise above those lines. Inside the
-   orb's stacking context, z-index -1 keeps the glow just behind the icon while
-   both sit above the rest of the page. */
-.theme-orb::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 34rem;
-    height: 34rem;
-    margin-left: -17rem;
-    margin-top: -17rem;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: -1;
-    background: radial-gradient(closest-side,
-            rgba(251, 191, 36, 0.19),
-            rgba(251, 146, 60, 0.10) 55%,
-            transparent 72%);
-    animation: glowBreathe calc(var(--sweep-dur) / 2) ease-in-out infinite;
-}
-
-html[data-theme="dark"] .theme-orb::before {
-    background: radial-gradient(closest-side,
-            rgba(226, 232, 255, 0.15),
-            rgba(129, 140, 248, 0.09) 55%,
-            transparent 72%);
-}
-
-@keyframes glowBreathe {
-
-    0%,
-    100% {
-        opacity: 0.75;
-        transform: scale(1);
-    }
-
-    50% {
-        opacity: 1;
-        transform: scale(1.08);
-    }
-}
-
 @media (prefers-reduced-motion: reduce) {
 
     #theme-icon.fa-sun,
-    #theme-icon.fa-moon,
-    .theme-orb::before {
+    #theme-icon.fa-moon {
         animation: none !important;
     }
 
     .theme-orb:hover {
         transform: none;
+    }
+}
+
+/* ---- Night icon: a distant star ------------------------------------------ */
+/* The sun is our star up close; in deep space the toggle becomes a star seen
+   from far away, drawn with the same four-point diffraction cross as the
+   bright stars in night-sky.webp, so it reads as part of the nebula rather
+   than a moon pasted over it. */
+/* Sized to its cell, with the spikes allowed to reach past the pill */
+.theme-star {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: calc(var(--sw-cell) * 1.9);
+    height: calc(var(--sw-cell) * 1.9);
+    margin: calc(var(--sw-cell) * -0.95) 0 0 calc(var(--sw-cell) * -0.95);
+    overflow: visible;
+    pointer-events: none;
+}
+
+/* Only the switch's icons show; the theme script still swaps this one's
+   classes, so it stays in the DOM */
+#theme-icon {
+    display: none !important;
+}
+
+/* The spikes only twinkle when the star is the active mode */
+html:not([data-theme="dark"]) .theme-star__spike {
+    animation: none;
+}
+
+.theme-star__spike,
+.theme-star__core,
+.theme-star__halo {
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+/* Twinkle: the two spike pairs breathe on co-prime periods, so the star never
+   pulses in a mechanical loop. Real diffraction spikes stay fixed to the
+   telescope, so nothing rotates. */
+.theme-star__spike--h {
+    animation: spikeTwinkle calc(var(--sweep-dur) / 3) ease-in-out infinite;
+}
+
+.theme-star__spike--v {
+    animation: spikeTwinkle calc(var(--sweep-dur) * 11 / 24) ease-in-out infinite reverse;
+}
+
+.theme-star__halo {
+    animation: haloTwinkle calc(var(--sweep-dur) / 4) ease-in-out infinite;
+}
+
+@keyframes spikeTwinkle {
+
+    0%,
+    100% {
+        transform: scale(0.8);
+        opacity: 0.75;
+    }
+
+    50% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes haloTwinkle {
+
+    0%,
+    100% {
+        transform: scale(0.9);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: scale(1.06);
+        opacity: 1;
+    }
+}
+
+html[data-theme="dark"] .theme-orb:focus-visible {
+    outline: 2px solid #c4b5fd;
+    outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .theme-star__spike,
+    .theme-star__halo {
+        animation: none !important;
+    }
+
+    .theme-switch__knob {
+        transition: none;
     }
 }
 

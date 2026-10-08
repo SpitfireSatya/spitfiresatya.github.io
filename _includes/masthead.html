@@ -21,6 +21,58 @@
         </ul>
         <ul class="hidden-links hidden"></ul>
       </nav>
+      <!-- Theme switch at the right end of the nav bar. A pill showing both
+           modes so it reads as a control: the sun (our star, up close) and a
+           distant star drawn with the same four-point diffraction cross as the
+           bright stars in the nebula, with a glowing knob behind the active
+           one. CSS places the knob from data-theme, so it's right on first
+           paint. It sits outside #site-nav because the greedy-nav script
+           treats every button inside the nav as its overflow toggle.
+           #theme-icon is kept, hidden, because the theme script swaps its
+           classes. -->
+      <button id="theme-toggle" class="theme-orb" type="button" title="Switch to dark mode"
+        aria-label="Switch to dark mode">
+        <i id="theme-icon" class="fa-solid fa-sun" aria-hidden="true"></i>
+        <span class="theme-switch__knob" aria-hidden="true"></span>
+        <span class="theme-switch__icon theme-switch__icon--sun" aria-hidden="true"><i class="fa-solid fa-sun"></i></span>
+        <span class="theme-switch__icon theme-switch__icon--star" aria-hidden="true">
+        <svg class="theme-star" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false">
+          <defs>
+            <radialGradient id="theme-star-core">
+              <stop offset="0" stop-color="#ffffff" />
+              <stop offset="0.38" stop-color="#f6f2ff" />
+              <stop offset="0.7" stop-color="#d9ccff" stop-opacity="0.55" />
+              <stop offset="1" stop-color="#c4b5fd" stop-opacity="0" />
+            </radialGradient>
+            <radialGradient id="theme-star-halo">
+              <stop offset="0" stop-color="#ede6ff" stop-opacity="0.55" />
+              <stop offset="0.45" stop-color="#a78bfa" stop-opacity="0.18" />
+              <stop offset="1" stop-color="#a78bfa" stop-opacity="0" />
+            </radialGradient>
+            <linearGradient id="theme-star-spike-h" gradientUnits="userSpaceOnUse" x1="-50" y1="0" x2="50" y2="0">
+              <stop offset="0" stop-color="#e9e2ff" stop-opacity="0" />
+              <stop offset="0.5" stop-color="#ffffff" />
+              <stop offset="1" stop-color="#e9e2ff" stop-opacity="0" />
+            </linearGradient>
+            <linearGradient id="theme-star-spike-v" gradientUnits="userSpaceOnUse" x1="0" y1="-50" x2="0" y2="50">
+              <stop offset="0" stop-color="#e9e2ff" stop-opacity="0" />
+              <stop offset="0.5" stop-color="#ffffff" />
+              <stop offset="1" stop-color="#e9e2ff" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <circle class="theme-star__halo" r="26" fill="url(#theme-star-halo)" />
+          <g class="theme-star__spike theme-star__spike--h">
+            <polygon points="-50,0 0,-4 50,0 0,4" fill="url(#theme-star-spike-h)" opacity="0.3" />
+            <polygon points="-50,0 0,-1.4 50,0 0,1.4" fill="url(#theme-star-spike-h)" />
+          </g>
+          <g class="theme-star__spike theme-star__spike--v">
+            <polygon points="0,-50 4,0 0,50 -4,0" fill="url(#theme-star-spike-v)" opacity="0.3" />
+            <polygon points="0,-50 1.4,0 0,50 -1.4,0" fill="url(#theme-star-spike-v)" />
+          </g>
+          <circle class="theme-star__core" r="9" fill="url(#theme-star-core)" />
+        </svg>
+        </span>
+      </button>
     </div>
   </div>
 </div>
