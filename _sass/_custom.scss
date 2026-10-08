@@ -65,7 +65,7 @@ html[data-theme="dark"] {
     /* rose-200: the warm accent, lightened for the night sky */
     --accent-red-deep: #fecdd3;
     --grad-text: linear-gradient(120deg, #67e8f9 0%, #a5b4fc 45%, #c4b5fd 100%);
-    --panel: rgba(7, 13, 32, 0.38);
+    --panel: rgba(6, 5, 15, 0.42);
     --grad: linear-gradient(120deg, #22d3ee 0%, #818cf8 45%, #a78bfa 100%);
     --grad-soft: linear-gradient(120deg, rgba(34, 211, 238, 0.14), rgba(129, 140, 248, 0.14), rgba(167, 139, 250, 0.14));
     --glow: rgba(129, 140, 248, 0.40);
@@ -78,9 +78,9 @@ html[data-theme="dark"] {
     --global-link-color-hover: #ffffff;
     --global-link-color-visited: #ede9fe;
 
-    /* Night sky: a deep navy canvas for the aurora to sit against */
-    --global-bg-color: #070d20;
-    --global-footer-bg-color: #060b1a;
+    /* Deep space: matches the nebula image's base (scripts/night_sky.py SPACE) */
+    --global-bg-color: #06050f;
+    --global-footer-bg-color: #05040c;
     --global-border-color: #26304d;
     --global-dark-border-color: #33405f;
     --global-code-background-color: #0d1428;
@@ -338,27 +338,45 @@ body::after {
     background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat;
 }
 
-/* Dark mode = night sky. Layer A carries the classic green/teal aurora
-   curtains plus two star fields at different scales for depth. */
+/* Dark mode = deep space: an M78-style nebula matching the LinkedIn cover.
+   It's a generated image (scripts/night_sky.py) because CSS gradients can
+   only make soft blobs, not dust lanes and a real starfield. The clouds sit in
+   the margins and fade to near-black behind the content column. The image is
+   only fetched when dark mode is on. */
 html[data-theme="dark"] body::after {
-    background-image:
-        radial-gradient(50rem 40rem at 12% -6%, rgba(34, 197, 94, 0.34), transparent 62%),
-        radial-gradient(46rem 38rem at 92% 4%, rgba(16, 185, 129, 0.30), transparent 62%),
-        radial-gradient(52rem 44rem at 70% 96%, rgba(20, 184, 166, 0.26), transparent 60%),
-        radial-gradient(40rem 34rem at 16% 104%, rgba(52, 211, 153, 0.24), transparent 60%),
-        radial-gradient(46rem 40rem at 46% 44%, rgba(6, 182, 212, 0.20), transparent 62%),
-        radial-gradient(rgba(255, 255, 255, 0.95) 1.1px, transparent 1.3px),
-        radial-gradient(rgba(255, 255, 255, 0.75) 0.9px, transparent 1.1px),
-        radial-gradient(rgba(214, 232, 255, 0.55) 0.7px, transparent 0.9px);
-    background-size:
-        100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%,
-        150px 150px, 91px 103px, 57px 61px;
-    background-position:
-        0 0, 0 0, 0 0, 0 0, 0 0,
-        12px 24px, 43px 9px, 71px 37px;
-    background-repeat:
-        no-repeat, no-repeat, no-repeat, no-repeat, no-repeat,
-        repeat, repeat, repeat;
+    background-image: url("/images/night-sky.webp");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* drift only: the light-mode cross-fade would dim the nebula to 14%, and
+       its large scale/translate would slide clouds in behind the text */
+    animation: nebulaDrift calc(var(--sweep-dur) * 3) ease-in-out infinite;
+}
+
+/* Phones have no side margins, so they get a portrait sky with the cloud
+   pushed into the top-right and bottom-left corners */
+@media (max-aspect-ratio: 4/5) {
+    html[data-theme="dark"] body::after {
+        background-image: url("/images/night-sky-portrait.webp");
+    }
+}
+
+/* The crimson crown belonged to the aurora; over the nebula it only adds a
+   pink cast that competes with the rose headings */
+html[data-theme="dark"]::after {
+    content: none;
+}
+
+@keyframes nebulaDrift {
+
+    0%,
+    100% {
+        transform: scale(1.04) translate3d(0, 0, 0);
+    }
+
+    50% {
+        transform: scale(1.07) translate3d(-0.8%, 0.6%, 0);
+    }
 }
 
 /* ---- Header / navigation color (no positioning changes) ----------------- */
