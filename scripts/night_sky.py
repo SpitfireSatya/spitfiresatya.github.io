@@ -16,6 +16,8 @@ import os
 import numpy as np
 from PIL import Image
 
+import earth
+
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SPACE = np.array([6, 5, 15], float)          # keep in sync with --global-bg-color
 
@@ -37,19 +39,34 @@ VARIANTS = {
         stars=3200,
         # none in the top-right: the theme toggle is drawn as a cross star
         # there and must be the only one, or it reads as a double star
-        crosses=[(0.975, 0.62, 1.0), (0.03, 0.07, 0.85), (0.025, 0.74, 0.6),
-                 (0.93, 0.97, 0.5), (0.20, 0.96, 0.45)],
+        crosses=[(0.975, 0.50, 1.0), (0.03, 0.07, 0.85), (0.025, 0.62, 0.6),
+                 (0.20, 0.80, 0.45)],
+        # Earth's limb, shared with day_sky.py: three points it passes through
+        # (0-1 units). Tilted, as in most ISS photos, so the horizon rises
+        # into the right margin where the sun comes up (sun_x).
+        horizon=[(0.0, 1.07), (0.5, 0.83), (1.0, 0.71)],
+        sun_x=0.90,
     ),
     "night-sky-portrait": dict(
         size=(1080, 1920),
+        # Phones have no margins, so the cloud runs at near full structure
+        # everywhere and `cap` limits its brightness behind text instead:
+        # white text needs a dark background, not an empty one.
         lobes=[(0.95, 0.10, 0.30, 0.12, -0.5, 1.0),
-               (0.05, 0.92, 0.32, 0.12, 0.4, 1.0),
-               (0.02, 0.45, 0.10, 0.16, 0.2, 0.5),
-               (0.98, 0.62, 0.10, 0.16, -0.2, 0.5),
-               (0.55, 0.50, 0.50, 0.25, -0.6, 0.3)],
-        boxes=[(0.04, 0.0, 0.96, 1.0, 0.28)],
+               (0.08, 0.68, 0.32, 0.12, 0.4, 1.0),       # above the horizon
+               (0.02, 0.38, 0.14, 0.18, 0.2, 0.8),
+               (0.98, 0.52, 0.14, 0.18, -0.2, 0.8),
+               (0.55, 0.42, 0.50, 0.25, -0.6, 0.55)],
+        boxes=[(0.04, 0.0, 0.96, 1.0, 0.75)],
+        cap=0.37,                       # brightest 1% of cloud still >= 4.5:1 for links
+        lights_floor=0.75,
+        blue_bias=0.3,                  # the cap keeps magenta dim enough
+        inside_stars=(0.85, 0.8),
+        dust_max=0.5,
         stars=1500,
-        crosses=[(0.12, 0.80, 0.7), (0.92, 0.70, 0.5)],
+        crosses=[(0.12, 0.62, 0.7), (0.92, 0.55, 0.5)],
+        horizon=[(0.0, 0.95), (0.5, 0.86), (1.0, 0.81)],
+        sun_x=0.86,
     ),
 }
 
@@ -74,7 +91,9 @@ def screen(a, layer):
     return 255 - (255 - a) * (255 - np.clip(layer, 0, 255)) / 255.0
 
 
-def render(name, size, lobes, boxes, stars, crosses):
+def render(name, size, lobes, boxes, stars, crosses, horizon=None, sun_x=None,
+           cap=None, lights_floor=None, blue_bias=1.0, inside_stars=(0.4, 0.45),
+           dust_max=0.75):
     W, H = size
     rng = np.random.default_rng(78)
     yy, xx = np.mgrid[0:H, 0:W].astype(float)
@@ -99,7 +118,7 @@ def render(name, size, lobes, boxes, stars, crosses):
     patch = np.clip((fbm(rng, W, H, 7, 6, 0.66) - 0.55) / 0.24, 0, 1) ** 1.3
     fil = (1 - np.abs(2 * fbm(rng, W, H, 3, 6, 0.65) - 1)) ** 4
     fil *= np.clip((fbm(rng, W, H, 4, 3) - 0.45) / 0.2, 0, 1)
-    absorb = np.clip(0.7 * patch + 0.5 * fil, 0, 0.75) * np.clip(dens / 0.6, 0, 1)
+    absorb = np.clip(0.7 * patch + 0.5 * fil, 0, dust_max) * np.clip(dens / 0.6, 0, 1)
     dens *= 1 - absorb
     core *= 1 - absorb
 
@@ -120,7 +139,7 @@ def render(name, size, lobes, boxes, stars, crosses):
     # emission (violet -> magenta) vs reflection (blue); blue wherever the
     # cloud reaches into the content area, so pale-rose headings stay distinct
     refl = np.clip((fbm(rng, W, H, 2, 3) - 0.42) / 0.3, 0, 1)
-    refl = np.maximum(refl, 1 - out)
+    refl = np.maximum(refl, (1 - out) * blue_bias)
     violet = np.array([70, 22, 120], float)
     magenta = np.array([200, 55, 200], float)
     blue = np.array([70, 95, 255], float)
@@ -132,15 +151,27 @@ def render(name, size, lobes, boxes, stars, crosses):
     img = screen(img, col * np.clip(dens, 0, 1.0)[..., None] * 1.05)
     img = screen(img, lav * np.clip(core, 0, 0.8)[..., None] * 0.6)
 
+    if cap is not None:
+        # tone the cloud down behind text without flattening it: scale each
+        # pixel's light above the base so its brightest channel stays under
+        # `cap`, rising back to full strength away from the content
+        # soft roll-off rather than a hard clip, so cores still read brighter
+        # than their edges and dust lanes don't flatten into black blotches
+        light = img - SPACE
+        peak = np.maximum(light.max(axis=2), 1e-3) / 255.0
+        limit = cap + (1 - cap) * out
+        soft = limit * (1 - np.exp(-peak / limit))
+        img = SPACE + light * (soft / peak)[..., None]
+
     # starfield: warm/white/blue, power-law brightness, sparse behind content
     tints = [np.array(c, float) for c in
              ((255, 214, 170), (255, 245, 235), (205, 220, 255), (255, 190, 140))]
     for _ in range(stars):
         x, y = rng.uniform(0, W), rng.uniform(0, H)
         inside_box = out[min(int(y), H - 1), min(int(x), W - 1)] < 0.5
-        if inside_box and rng.uniform() > 0.4:
+        if inside_box and rng.uniform() > inside_stars[0]:
             continue
-        b = min(rng.pareto(2.0) * 0.35 + 0.14, 1.0) * (0.45 if inside_box else 1.0)
+        b = min(rng.pareto(2.0) * 0.35 + 0.14, 1.0) * (inside_stars[1] if inside_box else 1.0)
         rad = 0.6 + 1.6 * b
         win = int(np.ceil(rad * 3 + 2))
         xa, xb = max(0, int(x) - win), min(W, int(x) + win + 1)
@@ -168,6 +199,15 @@ def render(name, size, lobes, boxes, stars, crosses):
         img[ya:yb, xa:xb] = screen(img[ya:yb, xa:xb],
                                    np.array([240, 235, 255.]) * np.clip(acc * b, 0, 1)[..., None])
 
+    if horizon:
+        # Earth's night side over the bottom of the frame; it hides whatever
+        # nebula and stars lie below the horizon
+        earth_calm = out if lights_floor is None else np.maximum(out, lights_floor)
+        img = earth.night(img, W, H, earth.geometry(W, H, horizon), sun_x, earth_calm)
+    return img
+
+
+def save(img, name):
     out_path = os.path.join(REPO, "images", f"{name}.webp")
     Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGB").save(
         out_path, "WEBP", quality=82, method=6)
@@ -176,4 +216,4 @@ def render(name, size, lobes, boxes, stars, crosses):
 
 if __name__ == "__main__":
     for name, cfg in VARIANTS.items():
-        render(name, **cfg)
+        save(render(name, **cfg), name)

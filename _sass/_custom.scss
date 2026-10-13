@@ -338,6 +338,29 @@ html[data-theme="dark"]::after {
     content: none;
 }
 
+/* Light mode = orbital sunrise over the same Earth as the dark-mode night
+   pass (scripts/day_sky.py and scripts/earth.py share the horizon), so the
+   theme toggle reads as time passing in orbit. Twilight indigo with the last
+   stars on the left, the sun rising over the limb in the right margin. */
+html:not([data-theme="dark"]) body::after {
+    background-image: url("/images/day-sky.webp");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    animation: nebulaDrift calc(var(--sweep-dur) * 3) ease-in-out infinite;
+}
+
+@media (max-aspect-ratio: 4/5) {
+    html:not([data-theme="dark"]) body::after {
+        background-image: url("/images/day-sky-portrait.webp");
+    }
+}
+
+/* Layer B's indigo cross-fade belonged to the old aurora */
+html:not([data-theme="dark"])::after {
+    content: none;
+}
+
 @keyframes nebulaDrift {
 
     0%,
