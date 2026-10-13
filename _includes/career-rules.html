@@ -1,0 +1,44 @@
+{% comment %}
+  Career as a set of rewrite rules plus the derivation they compose into, in
+  the style of the figures in the OOPSLA/ICSE papers. Data: _data/career.yml.
+  Hovering or focusing a rule highlights the skill it adds, in the rule and in
+  the final set, and vice versa (pure CSS, see _sass/_custom.scss "Career
+  figure"). The footer script fires the rules in sequence when the figure
+  scrolls into view.
+{% endcomment %}
+{% assign c = site.data.career %}
+{% assign last = c.rules | last %}
+<!-- the figcaption names the figure; rw-plain is a prose description of the
+     same rules for screen readers, since the notation does not read aloud well -->
+<figure class="rw-fig" aria-describedby="rw-plain">
+  <ol class="rw-rules">
+    {% for r in c.rules %}
+    <li class="rw-rule" data-step="{{ forloop.index }}" tabindex="0" style="--i: {{ forloop.index0 }}">
+      <div class="rw-premises">
+        {% for p in r.premises %}<span class="rw-p">{{ p | replace: "R", '<var>R</var>' }}</span>{% endfor %}
+      </div>
+      <div class="rw-bar" aria-hidden="true"></div>
+      <div class="rw-conc">
+        <span class="rw-term">⟨{{ r.from }}, <var>R</var>⟩</span>
+        <span class="rw-to">→</span>
+        <span class="rw-term">⟨{{ r.to }}, <var>R</var> ∪ {<span class="rw-skill" data-skill="{{ forloop.index }}">{{ r.adds }}</span>}⟩</span>
+      </div>
+      <div class="rw-meta">
+        <span class="rw-when">{{ r.when }}</span>
+        <span class="rw-name">({{ r.name }})</span>
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+  <p class="rw-derive"><span class="rw-steps">
+    <span class="rw-term rw-start">⟨{{ c.start }}, ∅⟩</span>
+    <span class="rw-result"><span class="rw-to rw-star">→*</span>
+    <span class="rw-term">⟨<strong>{{ last.to }}</strong>, {{ "{" }}{% for r in c.rules %}{% unless forloop.first %}<span class="rw-sep" data-skill="{{ forloop.index }}">, </span>{% endunless %}<span class="rw-skill" data-skill="{{ forloop.index }}" tabindex="0">{{ r.adds }}</span>{% endfor %}}⟩</span></span>
+  </span></p>
+  <figcaption id="rw-cap">
+    <span class="rw-figno">Fig. 1.</span> {{ c.caption }} <var>R</var> {{ c.caption_var }}
+  </figcaption>
+  <div id="rw-plain" class="visually-hidden">
+    {% for r in c.rules %}{{ r.plain }} {% endfor %}
+  </div>
+</figure>

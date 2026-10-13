@@ -26,6 +26,18 @@
             root.style.setProperty('--phase', -(Date.now() % 72000) / 1000 + 's');
         };
         apply();
+        /* The career figure fires its rules in sequence when it comes into
+           view; mark the page before first paint so the start state never
+           flashes. Without motion or IntersectionObserver it stays static. */
+        if ('IntersectionObserver' in window &&
+            !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+            root.classList.add('rw-armable');
+        }
+        /* A page prerendered on hover ran this script earlier; if the theme
+           was switched since, catch up the moment it is shown */
+        if (document.prerendering) {
+            document.addEventListener('prerenderingchange', apply, { once: true });
+        }
         /* Start fetching this theme's sky now. As a CSS background it is only
            discovered once main.css has loaded and been applied, which on a slow
            connection left the page without its sky for ~1.7 s. */

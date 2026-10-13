@@ -120,6 +120,23 @@
   })();
 </script>
 
+<!-- Career figure: fire the rules in sequence the first time it is in view
+     (immediately if it already is). head/theme-init.html decides whether the
+     page is .rw-armable at all. -->
+<script>
+  (function () {
+    var fig = document.querySelector('.rw-fig');
+    if (!fig || !document.documentElement.classList.contains('rw-armable')) return;
+    var io = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting) {
+        fig.classList.add('rw-fired');
+        io.disconnect();
+      }
+    }, { threshold: 0.35 });
+    io.observe(fig);
+  })();
+</script>
+
 <!-- Back-to-top button (injected via JS so it's absent without scripting) -->
 <script>
   (function () {

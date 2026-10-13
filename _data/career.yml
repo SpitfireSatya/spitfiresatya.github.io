@@ -1,0 +1,45 @@
+# Career as rewrite rules, rendered by _includes/career-rules.html on the
+# About page (same content as the LinkedIn cover, scripts/linkedin_cover.py).
+#
+# State is ⟨role, R⟩ where R is the set of skills acquired so far. Each rule
+# fires from the previous rule's role and adds one skill to R, so the rules
+# chain into the closing derivation ⟨start, ∅⟩ →* ⟨last role, {all skills}⟩.
+#
+# Constraints that keep the derivation sound (each was a real bug once):
+#   - the first rule's premises must not mention R, since R starts empty
+#   - a premise must hold BEFORE its rule fires (e.g. no security interest
+#     before the auditing that sparked it)
+#   - `interests` is set once; later rules use a different variable
+# In premises, a capital R is rendered as the variable; avoid it elsewhere.
+start: developer
+rules:
+  - name: Audit-Code
+    when: TCS · 2017
+    premises: ["quality ∈ goals", "compliance = 100%"]
+    from: developer
+    to: auditor
+    adds: code audits
+    plain: "Developer to code auditor at TCS in 2017, after holding the code to 100% compliance with coding standards."
+  - name: Enter-Grad-School
+    when: Northeastern · 2019
+    premises: ["{code audits} ⊆ R", "security ∈ interests"]
+    from: auditor
+    to: MS CY
+    adds: pen testing
+    plain: "Code auditor to an M.S. in Cybersecurity at Northeastern in 2019, once auditing had sparked an interest in security."
+  - name: Start-Research
+    when: Northeastern · 2021
+    premises: ["advisor = Frank Tip", "research ⊆ PL ∩ SE"]
+    from: MS CY
+    to: PhD
+    adds: program analysis
+    plain: "M.S. to a PhD at Northeastern in 2021, advised by Frank Tip, researching programming languages and software engineering."
+  - name: Apply-Research
+    when: AWS · 2025
+    premises: ["defended(thesis)", "internships = 3"]
+    from: PhD
+    to: scientist
+    adds: correctness
+    plain: "PhD to Applied Scientist at AWS in 2025, after defending the thesis and three internships."
+caption: "Career transitions as rewrite rules;"
+caption_var: "is the set of skills acquired so far."

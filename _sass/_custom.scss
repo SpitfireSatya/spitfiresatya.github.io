@@ -1642,3 +1642,255 @@ html[data-theme="dark"] .theme-orb:focus-visible {
     outline: 3px solid var(--accent);
     outline-offset: 2px;
 }
+
+/* ---- Career figure (_includes/career-rules.html) ------------------------ */
+/* The LinkedIn cover's rewrite rules as real text: premises over a bar, the
+   term rewrite below, chronological footer, then the derivation the rules
+   compose into. Typeset like the figures in the papers. */
+.rw-fig {
+    --rw-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --rw-var: #0b6680;
+    /* between cyan-700 and -800, measured 5.7:1 on the light panel */
+    --rw-muted: #4b5468;
+    --rw-hi-bg: rgba(14, 116, 144, 0.13);
+    --rw-hi: #155e75;
+    container-type: inline-size;
+    margin: 2rem 0 2.25rem;
+    padding: 1.4rem 1.5rem 1.1rem;
+    border: 1px solid var(--global-border-color);
+    border-radius: 12px;
+    background: var(--panel);
+    -webkit-backdrop-filter: blur(7px) saturate(1.08);
+    backdrop-filter: blur(7px) saturate(1.08);
+    font-family: var(--rw-mono);
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+html[data-theme="dark"] .rw-fig {
+    --rw-var: #67e8f9;
+    --rw-muted: #b4bfd9;
+    --rw-hi-bg: rgba(103, 232, 249, 0.16);
+    --rw-hi: #cffafe;
+}
+
+.rw-fig var {
+    font-style: normal;
+    font-weight: 700;
+    color: var(--rw-var);
+}
+
+/* One column, read top to bottom like a derivation. Two side by side don't
+   fit the content column at a legible size. fit-content makes every rule as
+   wide as the widest, so all the bars share one length, as on the cover. */
+.rw-rules {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.95rem;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+}
+
+.rw-rule {
+    margin: 0;
+    padding: 0.35rem 0.5rem;
+    border-radius: 8px;
+    text-align: center;
+    outline: none;
+    /* opacity is listed second so the firing delay below can apply to it
+       alone; a blanket transition-delay also delayed the hover highlight,
+       which made the last rule take 1.4 s to respond */
+    transition: background 0.2s ease, opacity 0.35s ease;
+}
+
+.rw-rule:focus-visible {
+    box-shadow: 0 0 0 2px var(--rw-var);
+}
+
+.rw-premises {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 2.2em;
+    color: var(--rw-muted);
+}
+
+.rw-bar {
+    height: 1.5px;
+    margin: 0.35rem 0 0.4rem;
+    background: var(--grad);
+    border-radius: 2px;
+    transform-origin: center;
+}
+
+.rw-conc {
+    color: var(--global-text-color);
+}
+
+.rw-term {
+    white-space: nowrap;
+}
+
+.rw-to {
+    margin: 0 0.45em;
+    color: var(--rw-var);
+    font-weight: 700;
+}
+
+.rw-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 1em;
+    margin-top: 0.35rem;
+    font-family: "Inter", sans-serif;
+    font-size: 0.72rem;
+}
+
+.rw-when {
+    color: var(--rw-muted);
+}
+
+.rw-name {
+    font-family: var(--rw-mono);
+    color: var(--rw-var);
+}
+
+/* the theorem: what the four rules add up to */
+.rw-derive {
+    margin: 1.2rem 0 0.6rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--global-border-color);
+    text-align: center;
+    font-size: 0.86rem;
+    line-height: 1.6;
+}
+
+/* the closing line stays whole wherever it fits; on narrow screens the set
+   wraps between skills */
+/* in px, not rem: the theme enlarges the root font on wide screens */
+@container (max-width: 600px) {
+    .rw-result,
+    .rw-derive .rw-term {
+        white-space: normal;
+    }
+}
+
+/* Two lines, set like a reduction in the papers: the start state, then
+   "→* result" beneath it, the two terms left-aligned and the block centred */
+.rw-steps {
+    display: inline-block;
+    max-width: 100%;
+    text-align: left;
+}
+
+.rw-start {
+    display: block;
+    padding-left: 3ch;          /* the width of "→* " */
+    color: var(--rw-muted);
+}
+
+.rw-derive .rw-star {
+    margin: 0 1ch 0 0;
+}
+
+.rw-result {
+    white-space: nowrap;
+}
+
+.rw-derive strong {
+    color: var(--accent);
+}
+
+.rw-skill {
+    padding: 0 0.15em;
+    border-radius: 4px;
+    transition: background 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+}
+
+.rw-derive .rw-skill {
+    cursor: default;
+    outline: none;
+}
+
+.rw-derive .rw-skill:focus-visible {
+    box-shadow: 0 0 0 2px var(--rw-var);
+}
+
+.rw-fig figcaption {
+    margin: 0;
+    text-align: center;
+    font-family: "Inter", sans-serif;
+    font-size: 0.78rem;
+    color: var(--rw-muted);
+}
+
+.rw-figno {
+    font-weight: 700;
+    color: var(--global-text-color);
+}
+
+/* Traceability: point at a rule and the skill it adds lights up, in the rule
+   and in the final set; point at a skill in the final set and its rule lights
+   up. :has() keeps it CSS-only; tapping works too because both are focusable. */
+/* :focus, not :focus-visible, to match the :has() rules below: a rule reached
+   by keyboard or tap highlights the same way as one under the pointer. The
+   focus ring above stays :focus-visible, so a tap doesn't draw one. */
+.rw-rule:is(:hover, :focus) {
+    background: var(--rw-hi-bg);
+}
+
+@for $n from 1 through 8 {
+
+    .rw-fig:has(.rw-rule[data-step="#{$n}"]:is(:hover, :focus)) .rw-skill[data-skill="#{$n}"],
+    .rw-fig:has(.rw-derive .rw-skill[data-skill="#{$n}"]:is(:hover, :focus)) .rw-skill[data-skill="#{$n}"] {
+        background: var(--rw-hi-bg);
+        color: var(--rw-hi);
+        font-weight: 700;
+    }
+
+    .rw-fig:has(.rw-derive .rw-skill[data-skill="#{$n}"]:is(:hover, :focus)) .rw-rule[data-step="#{$n}"] {
+        background: var(--rw-hi-bg);
+    }
+}
+
+/* Firing: once the figure is in view the rules apply one after another, each
+   bar drawing out and its skill joining the final set. The first-paint script
+   puts .rw-armable on <html> only when motion is allowed and the observer
+   exists, so nothing flashes and nothing stays hidden without JavaScript. */
+.rw-armable .rw-fig .rw-rule {
+    opacity: 0.25;
+}
+
+.rw-armable .rw-fig .rw-bar {
+    transform: scaleX(0);
+}
+
+.rw-armable .rw-fig .rw-derive :is(.rw-skill, .rw-sep) {
+    opacity: 0;
+}
+
+.rw-armable .rw-fig.rw-fired .rw-rule {
+    opacity: 1;
+    transition-delay: 0s, calc(var(--i) * 0.45s);   /* background, opacity */
+}
+
+.rw-armable .rw-fig.rw-fired .rw-bar {
+    transform: none;
+    transition: transform 0.45s ease;
+    transition-delay: calc(var(--i) * 0.45s + 0.1s);
+}
+
+.rw-armable .rw-fig.rw-fired .rw-derive :is(.rw-skill, .rw-sep) {
+    opacity: 1;
+    transition: opacity 0.35s ease;
+}
+
+@for $n from 1 through 8 {
+    .rw-armable .rw-fig.rw-fired .rw-derive :is(.rw-skill, .rw-sep)[data-skill="#{$n}"] {
+        transition-delay: #{($n - 1) * 0.45 + 0.4}s;
+    }
+}
