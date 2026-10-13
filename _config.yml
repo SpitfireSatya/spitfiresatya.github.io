@@ -23,7 +23,7 @@ repository               : "SpitfireSatya/spitfiresatya.github.io"
 #               Additional customization can be done by editing /_includes/author-profile.html
 author:
   # Biographic information
-  avatar           : "profile.jpg"
+  avatar           : "profile-400.webp" # 400px resize of profile.jpg (1080px, 147 KB); shown at ~175px
   name             : "Satyajit Gokhale"
   pronouns         : "he/him" # example: "she/her"  
   bio              : "Software Craftsman, Cybersecurity Enthusiast, Programming Researcher"

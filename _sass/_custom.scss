@@ -619,20 +619,60 @@ blockquote {
     border-image: var(--grad) 1;
 }
 
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(14px);
-    }
+/* ---- Navigation between pages ------------------------------------------ */
+/* The theme fades the masthead, content and footer in on every page load
+   (0.15-0.45 s delays), so each click blanked the screen and rebuilt it.
+   Cross-document view transitions replace that: the browser keeps the old page
+   up until the new one is ready, then cross-fades. Browsers without support
+   (Firefox today) simply navigate. */
+.masthead,
+.breadcrumbs,
+#main,
+.page__hero,
+.page__hero--overlay,
+.page__footer {
+    animation: none;
+}
 
-    to {
-        opacity: 1;
-        transform: none;
+@view-transition {
+    navigation: auto;
+}
+
+/* Chrome that is the same on every page stays put instead of cross-fading */
+.masthead {
+    view-transition-name: masthead;
+}
+
+.sidebar {
+    view-transition-name: sidebar;
+}
+
+::view-transition-group(root) {
+    animation-duration: 0.22s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @view-transition {
+        navigation: none;
     }
 }
 
-.page__content {
-    animation: fadeInUp 0.5s ease both;
+/* Every looping background animation restarts when a new page loads, so the
+   sky and the gradient lines jumped on each click. The first-paint script sets
+   --phase to how far into the 72 s cycle we are (all these loops divide 72 s),
+   so each page picks the animation up where the last one left off. */
+body::before,
+body::after,
+html::after,
+.masthead::after,
+.page__footer::before,
+.page__content h1::after,
+.page__content h2::after,
+.page__content hr,
+.archive>h2::after,
+.archive>hr,
+.cv-timeline .cv-list::before {
+    animation-delay: var(--phase, 0s) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

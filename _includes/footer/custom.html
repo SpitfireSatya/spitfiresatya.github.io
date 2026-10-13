@@ -1,7 +1,10 @@
 <!-- start custom footer snippets -->
 
-<!-- Support for MathJax -->
+<!-- MathJax (~260 KB) loads only on pages that ask for it with `math: true`
+     in their front matter; no page currently has math -->
+{% if page.math %}
 <script id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@4.0.0/tex-mml-chtml.js"></script>
+{% endif %}
 
 <!-- Make whole cards clickable. Done in JS rather than with a stretched CSS
      overlay so that selecting the card's text still works, and so clicks that

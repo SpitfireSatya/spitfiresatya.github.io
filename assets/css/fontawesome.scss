@@ -1,10 +1,63 @@
 ---
 ---
 
-// Vendor SCSS compile to reduce main.scss weight
-
-@import
-    "vendor/font-awesome/fontawesome",
-    "vendor/font-awesome/solid",
-    "vendor/font-awesome/brands"
+// Font Awesome, cut down to the icons the site uses. The vendor entry points
+// (vendor/font-awesome/fontawesome, solid, brands) would emit all ~2,000
+// icons and load 270 KB of fonts; this imports the same core pieces, swaps in
+// the generated icon list, and points at subset fonts. To add an icon, use it
+// in a page or template, then run scripts/subset_icons.py.
+@import "vendor/font-awesome/functions",
+"vendor/font-awesome/variables",
+"fa-icons-used",
+"vendor/font-awesome/mixins",
+"vendor/font-awesome/core",
+"vendor/font-awesome/sizing",
+"vendor/font-awesome/fixed-width",
+"vendor/font-awesome/list",
+"vendor/font-awesome/bordered-pulled",
+"vendor/font-awesome/animated",
+"vendor/font-awesome/rotated-flipped",
+"vendor/font-awesome/stacked",
+"vendor/font-awesome/icons",
+"vendor/font-awesome/screen-reader"
 ;
+
+:root,
+:host {
+    --#{$fa-css-prefix}-style-family-classic: '#{ $fa-style-family }';
+    --#{$fa-css-prefix}-font-solid: normal 900 1em/1 '#{ $fa-style-family }';
+    --#{$fa-css-prefix}-style-family-brands: 'Font Awesome 6 Brands';
+    --#{$fa-css-prefix}-font-brands: normal 400 1em/1 'Font Awesome 6 Brands';
+}
+
+@font-face {
+    font-family: 'Font Awesome 6 Free';
+    font-style: normal;
+    font-weight: 900;
+    font-display: $fa-font-display;
+    src: url('#{$fa-font-path}/fa-solid-900-subset.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Font Awesome 6 Brands';
+    font-style: normal;
+    font-weight: 400;
+    font-display: $fa-font-display;
+    src: url('#{$fa-font-path}/fa-brands-400-subset.woff') format('woff');
+}
+
+.fas,
+.#{$fa-css-prefix}-solid {
+    font-weight: 900;
+}
+
+.fab,
+.#{$fa-css-prefix}-brands {
+    font-weight: 400;
+}
+
+@each $name, $icon in $fa-brand-icons {
+    .#{$fa-css-prefix}-#{$name} {
+        #{$fa-icon-property}: unquote("\"#{ $icon }\"");
+    }
+}

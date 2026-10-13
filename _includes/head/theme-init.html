@@ -1,0 +1,58 @@
+{% include base_path %}
+
+<!-- Apply the stored/system colour scheme before first paint. Included from
+     head.html BEFORE the stylesheet: an inline script after a stylesheet waits
+     for it to download, which delayed both the theme and the sky preload.
+     The theme JS calls setTheme() with no argument on load, whose fallback is a
+     boolean, so the OS preference was never applied on the initial render. -->
+<script>
+    (function () {
+        var root = document.documentElement;
+        var pickTheme = function () {
+            try {
+                var stored = localStorage.getItem('theme');
+                if (stored === 'dark' || stored === 'light') return stored;
+            } catch (e) { /* private mode / storage disabled */ }
+            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        };
+        var apply = function () {
+            if (pickTheme() === 'dark') {
+                root.setAttribute('data-theme', 'dark');
+            } else {
+                root.removeAttribute('data-theme');
+            }
+            /* The background loops all divide 72 s; starting them this far in
+               means each new page continues the motion instead of restarting */
+            root.style.setProperty('--phase', -(Date.now() % 72000) / 1000 + 's');
+        };
+        apply();
+        /* Start fetching this theme's sky now. As a CSS background it is only
+           discovered once main.css has loaded and been applied, which on a slow
+           connection left the page without its sky for ~1.7 s. */
+        var portrait = window.matchMedia && window.matchMedia('(max-aspect-ratio: 4/5)').matches;
+        var sky = document.createElement('link');
+        sky.rel = 'preload';
+        sky.as = 'image';
+        /* low: let main.css win the bandwidth; the sky still starts early */
+        sky.fetchPriority = 'low';
+        sky.href = '{{ base_path }}/images/' + (pickTheme() === 'dark' ? 'night' : 'day') +
+            '-sky' + (portrait ? '-portrait' : '') + '.webp';
+        document.head.appendChild(sky);
+    })();
+</script>
+
+<!-- Chrome and Edge start loading a page when its link is hovered (or pressed
+     on touch), so the click feels instant. Other browsers ignore this. Limited
+     to this site's pages; files, feeds and new-tab links are left alone. -->
+<script type="speculationrules">
+{
+  "prerender": [{
+    "where": { "and": [
+      { "href_matches": "/*" },
+      { "not": { "href_matches": ["/files/*", "/images/*", "/feed.xml", "/*.pdf", "/*.bib"] } },
+      { "not": { "selector_matches": "[target=_blank], [download], [rel~=nofollow]" } }
+    ] },
+    "eagerness": "moderate"
+  }]
+}
+</script>
